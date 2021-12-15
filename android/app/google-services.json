@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "202888499185",
+    "project_id": "wham-ad61b",
+    "storage_bucket": "wham-ad61b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202888499185:android:82d55d594a3baa26837e50",
+        "android_client_info": {
+          "package_name": "com.example.wham"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "202888499185-m6oem5t2kod3odtfptd5ogo4jdemushh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-Gq2YdV8E82qv2aDSKrsWJgurOsT6FbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "202888499185-m6oem5t2kod3odtfptd5ogo4jdemushh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "202888499185-0gb3rgla3iog2khir32fumso874e9o50.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.wham"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
