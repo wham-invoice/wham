@@ -4,6 +4,8 @@ import 'package:wham/utils/authentication.dart';
 import 'package:wham/widgets/google_signin_button.dart';
 
 class SignInScreen extends StatefulWidget {
+  static const routeName = '/sign-in';
+
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
