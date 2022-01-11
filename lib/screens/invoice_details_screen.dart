@@ -4,11 +4,9 @@ import 'package:wham/schema/client.dart';
 import 'package:wham/schema/invoice.dart';
 
 class InvoiceDetailScreen extends StatelessWidget {
-  // In the constructor, require a Todo.
   const InvoiceDetailScreen({Key? key, required this.invoice})
       : super(key: key);
 
-  // Declare a field that holds the Todo.
   final Invoice invoice;
 
   @override

@@ -1,11 +1,24 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:wham/screens/sign_in_screen.dart';
+import 'package:wham/screens/utils.dart';
+import 'package:wham/utils/authentication.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
+  static const routeName = '/home';
+
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
+
+    final welcomeBackMsg = "Welcome back " + args.user.uid;
+
+    const signOutSnackBar = SnackBar(
+      content: Text('Signing out'),
+    );
+
     return PlatformScaffold(
         appBar: PlatformAppBar(),
         body: Center(
@@ -23,6 +36,11 @@ class HomeScreen extends StatelessWidget {
                 //     child: const Text('PayE calculator'),
                 //   ),
                 // ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: PlatformText(welcomeBackMsg),
+                ),
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -53,16 +71,21 @@ class HomeScreen extends StatelessWidget {
                     child: const Text('Invoices'),
                   ),
                 ),
-                // Padding(
-                //   padding:
-                //       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                //   child: PlatformElevatedButton(
-                //     onPressed: () {
-                //       Navigator.pushNamed(context, '/settings');
-                //     },
-                //     child: const Text('Settings'),
-                //   ),
-                // ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: PlatformElevatedButton(
+                    onPressed: () async {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(signOutSnackBar);
+                      await Authentication.signOut(context: context);
+
+                      Navigator.of(context)
+                          .pushReplacementNamed(SignInScreen.routeName);
+                    },
+                    child: const Text('Sign out'),
+                  ),
+                ),
               ]),
         ));
   }
