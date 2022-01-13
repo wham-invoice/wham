@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:wham/screens/home_screen.dart';
-import 'package:wham/screens/utils.dart';
 import 'package:wham/utils/authentication.dart';
 
 class GoogleSignInButton extends StatefulWidget {
@@ -43,9 +41,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 });
 
                 if (user != null) {
-                  final args = ScreenArguments(user);
-                  Navigator.pushReplacementNamed(context, HomeScreen.routeName,
-                      arguments: args);
+                  Authentication.onSignIn(context: context, user: user);
                 }
               },
               child: Padding(

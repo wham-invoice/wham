@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wham/firebase_options.dart';
@@ -8,6 +9,38 @@ import 'package:wham/screens/home_screen.dart';
 import 'package:wham/screens/utils.dart';
 
 class Authentication {
+  static onSignIn({required BuildContext context, required User user}) async {
+    final uid = user.uid;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get()
+          .then((doc) {
+        if (!doc.exists) {
+          print("saving new user: " + uid);
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .set({'displayName': user.displayName, 'uid': uid});
+        } else {
+          print("user exists: " + uid);
+        }
+      });
+    } catch (e) {
+      print("error: " + e.toString());
+      return false;
+    }
+
+    Navigator.pushReplacementNamed(
+      context,
+      HomeScreen.routeName,
+      arguments: ScreenArguments(user),
+    );
+  }
+
+  // TODO remove
   static SnackBar customSnackBar({required String content}) {
     return SnackBar(
       backgroundColor: Colors.black,
@@ -27,12 +60,7 @@ class Authentication {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      print("user exists.");
-      Navigator.pushReplacementNamed(
-        context,
-        HomeScreen.routeName,
-        arguments: ScreenArguments(user),
-      );
+      onSignIn(context: context, user: user);
     }
 
     return firebaseApp;
