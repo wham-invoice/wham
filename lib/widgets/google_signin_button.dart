@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:wham/screens/home_screen.dart';
-import 'package:wham/screens/utils.dart';
+import 'package:loggy/loggy.dart';
 import 'package:wham/utils/authentication.dart';
 
 class GoogleSignInButton extends StatefulWidget {
@@ -11,7 +10,7 @@ class GoogleSignInButton extends StatefulWidget {
   _GoogleSignInButtonState createState() => _GoogleSignInButtonState();
 }
 
-class _GoogleSignInButtonState extends State<GoogleSignInButton> {
+class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
   bool _isSigningIn = false;
 
   @override
@@ -43,9 +42,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 });
 
                 if (user != null) {
-                  final args = ScreenArguments(user);
-                  Navigator.pushReplacementNamed(context, HomeScreen.routeName,
-                      arguments: args);
+                  Authentication.onSignIn(
+                      context: context, logger: loggy, user: user);
                 }
               },
               child: Padding(

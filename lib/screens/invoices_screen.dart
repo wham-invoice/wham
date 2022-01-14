@@ -1,22 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 import 'package:wham/schema/invoice.dart';
 import 'package:wham/screens/invoice_details_screen.dart';
+import 'package:wham/screens/utils.dart';
 
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({Key? key}) : super(key: key);
+
+  static const routeName = '/invoices';
 
   @override
   State<InvoicesScreen> createState() => _InvoicesScreenState();
 }
 
-class _InvoicesScreenState extends State<InvoicesScreen> {
-  final Stream<QuerySnapshot> _invoicesStream =
-      FirebaseFirestore.instance.collection('invoices').snapshots();
-
+class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
+
+    final Stream<QuerySnapshot> _invoicesStream = FirebaseFirestore.instance
+        .collection('invoices')
+        .where("user_id", isEqualTo: args.user.uid)
+        .snapshots();
+
     return PlatformScaffold(
       appBar: PlatformAppBar(),
       iosContentPadding: false,
@@ -26,6 +34,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) {
+              loggy.error(snapshot.error);
               return PlatformText('Something went wrong');
             }
 

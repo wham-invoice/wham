@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:loggy/loggy.dart';
 import 'package:wham/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,7 +9,42 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:wham/screens/home_screen.dart';
 import 'package:wham/screens/utils.dart';
 
-class Authentication {
+class Authentication with UiLoggy {
+  static onSignIn(
+      {required BuildContext context,
+      required Loggy<UiLoggy> logger,
+      required User user}) async {
+    final uid = user.uid;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get()
+          .then((doc) {
+        if (!doc.exists) {
+          logger.info("saving new user: $uid");
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .set({'displayName': user.displayName, 'uid': uid});
+        } else {
+          logger.debug("user exists: $uid");
+        }
+      });
+    } catch (e) {
+      print("error: " + e.toString());
+      return false;
+    }
+
+    Navigator.pushReplacementNamed(
+      context,
+      HomeScreen.routeName,
+      arguments: ScreenArguments(user),
+    );
+  }
+
+  // TODO remove
   static SnackBar customSnackBar({required String content}) {
     return SnackBar(
       backgroundColor: Colors.black,
@@ -20,6 +57,7 @@ class Authentication {
 
   static Future<FirebaseApp> initializeFirebase({
     required BuildContext context,
+    required Loggy<UiLoggy> logger,
   }) async {
     FirebaseApp firebaseApp = await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
@@ -27,12 +65,7 @@ class Authentication {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      print("user exists.");
-      Navigator.pushReplacementNamed(
-        context,
-        HomeScreen.routeName,
-        arguments: ScreenArguments(user),
-      );
+      onSignIn(context: context, logger: logger, user: user);
     }
 
     return firebaseApp;
