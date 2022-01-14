@@ -1,4 +1,5 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:loggy/loggy.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,6 +31,15 @@ const cupertinoTheme = CupertinoThemeData(
     scaffoldBackgroundColor: Colors.white);
 
 void main() {
+  Loggy.initLoggy(
+    logPrinter: const PrettyPrinter(
+      showColors: true,
+    ),
+    logOptions: const LogOptions(
+      LogLevel.all,
+      stackTraceLevel: LogLevel.off,
+    ),
+  );
   WidgetsFlutterBinding.ensureInitialized();
 
   BlocOverrides.runZoned(

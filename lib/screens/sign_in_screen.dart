@@ -1,5 +1,6 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 import 'package:wham/utils/authentication.dart';
 import 'package:wham/widgets/google_signin_button.dart';
 
@@ -10,7 +11,7 @@ class SignInScreen extends StatefulWidget {
   _SignInScreenState createState() => _SignInScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignInScreenState extends State<SignInScreen> with UiLoggy {
   @override
   Widget build(BuildContext context) {
     return PlatformScaffold(
@@ -26,7 +27,8 @@ class _SignInScreenState extends State<SignInScreen> {
             children: [
               Row(),
               FutureBuilder(
-                future: Authentication.initializeFirebase(context: context),
+                future: Authentication.initializeFirebase(
+                    context: context, logger: loggy),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const Text('Error initializing Firebase');

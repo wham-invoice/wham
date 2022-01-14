@@ -1,10 +1,12 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
+import 'package:wham/screens/invoices_screen.dart';
 import 'package:wham/screens/sign_in_screen.dart';
 import 'package:wham/screens/utils.dart';
 import 'package:wham/utils/authentication.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatelessWidget with UiLoggy {
   const HomeScreen({Key? key}) : super(key: key);
 
   static const routeName = '/home';
@@ -66,7 +68,11 @@ class HomeScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: PlatformElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/invoices');
+                      Navigator.pushNamed(
+                        context,
+                        InvoicesScreen.routeName,
+                        arguments: ScreenArguments(args.user),
+                      );
                     },
                     child: const Text('Invoices'),
                   ),
@@ -76,6 +82,7 @@ class HomeScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: PlatformElevatedButton(
                     onPressed: () async {
+                      loggy.info("user pressed sign out");
                       ScaffoldMessenger.of(context)
                           .showSnackBar(signOutSnackBar);
                       await Authentication.signOut(context: context);

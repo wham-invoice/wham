@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:loggy/loggy.dart';
 import 'package:wham/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,8 +9,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:wham/screens/home_screen.dart';
 import 'package:wham/screens/utils.dart';
 
-class Authentication {
-  static onSignIn({required BuildContext context, required User user}) async {
+class Authentication with UiLoggy {
+  static onSignIn(
+      {required BuildContext context,
+      required Loggy<UiLoggy> logger,
+      required User user}) async {
     final uid = user.uid;
 
     try {
@@ -19,13 +23,13 @@ class Authentication {
           .get()
           .then((doc) {
         if (!doc.exists) {
-          print("saving new user: " + uid);
+          logger.info("saving new user: $uid");
           FirebaseFirestore.instance
               .collection('users')
               .doc(uid)
               .set({'displayName': user.displayName, 'uid': uid});
         } else {
-          print("user exists: " + uid);
+          logger.debug("user exists: $uid");
         }
       });
     } catch (e) {
@@ -53,6 +57,7 @@ class Authentication {
 
   static Future<FirebaseApp> initializeFirebase({
     required BuildContext context,
+    required Loggy<UiLoggy> logger,
   }) async {
     FirebaseApp firebaseApp = await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
@@ -60,7 +65,7 @@ class Authentication {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      onSignIn(context: context, user: user);
+      onSignIn(context: context, logger: logger, user: user);
     }
 
     return firebaseApp;
