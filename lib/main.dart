@@ -66,7 +66,7 @@ class WhamApp extends StatelessWidget {
               create: (context) => PayeCubit(),
               child: const PayEFormScreen(),
             ),
-        '/invoices': (context) => const InvoicesScreen(),
+        InvoicesScreen.routeName: (context) => const InvoicesScreen(),
         '/new_invoice': (context) => const NewInvoiceScreen(),
         '/new_client': (context) => const NewClientScreen(),
         SignInScreen.routeName: (context) =>

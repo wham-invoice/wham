@@ -35,10 +35,6 @@ class InvoiceDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 16),
-                        child: _clientBuilder()),
-                    Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 16),
                       child: PlatformText("Hours: ${invoice.hours} "),
@@ -77,19 +73,6 @@ class InvoiceDetailScreen extends StatelessWidget {
                       ),
                     ),
                   ]))),
-    );
-  }
-
-  Widget _clientBuilder() {
-    return Center(
-      child: FutureBuilder<Client>(
-          future: invoice.getClient(),
-          builder: (context, snapshot) {
-            String textValue = snapshot.hasData
-                ? snapshot.data!.firstName
-                : "loading client...";
-            return PlatformText(textValue);
-          }),
     );
   }
 }
