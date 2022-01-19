@@ -45,7 +45,8 @@ class _HoursScreenState extends State<HoursScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: PlatformTextField(
                     controller: invoiceTextController,
                     keyboardType: TextInputType.text,

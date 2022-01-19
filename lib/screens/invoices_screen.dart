@@ -22,7 +22,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
 
     final Stream<QuerySnapshot> _invoicesStream = FirebaseFirestore.instance
         .collection('invoices')
-        .where("user_id", isEqualTo: args.user.uid)
+        .where("user_id", isEqualTo: args.user.id)
         .snapshots();
 
     return PlatformScaffold(

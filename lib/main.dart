@@ -70,7 +70,7 @@ class WhamApp extends StatelessWidget {
         '/new_invoice': (context) => const NewInvoiceScreen(),
         '/new_client': (context) => const NewClientScreen(),
         SignInScreen.routeName: (context) =>
-            Builder(builder: (context) => SignInScreen()),
+            Builder(builder: (context) => const SignInScreen()),
       },
     );
   }
