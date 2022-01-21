@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:googleapis_auth/auth_io.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fire_auth;
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:loggy/loggy.dart';
-import 'package:wham/firebase_options.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:loggy/loggy.dart';
+import 'package:wham/firebase_options.dart';
+import 'package:wham/schema/user.dart';
 import 'package:wham/screens/home_screen.dart';
 import 'package:wham/screens/utils.dart';
 
@@ -13,38 +16,47 @@ class Authentication with UiLoggy {
   static onSignIn(
       {required BuildContext context,
       required Loggy<UiLoggy> logger,
-      required User user}) async {
-    final uid = user.uid;
-
+      required fire_auth.User firebaseUser,
+      required GoogleSignIn gSignIn}) async {
+    DocumentSnapshot snap;
     try {
-      await FirebaseFirestore.instance
+      snap = await FirebaseFirestore.instance
           .collection('users')
-          .doc(uid)
-          .get()
-          .then((doc) {
-        if (!doc.exists) {
-          logger.info("saving new user: $uid");
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(uid)
-              .set({'displayName': user.displayName, 'uid': uid});
-        } else {
-          logger.debug("user exists: $uid");
-        }
-      });
+          .doc(firebaseUser.uid)
+          .get();
+
+      if (!snap.exists) {
+        logger.info("saving new user: $firebaseUser.uid");
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set({
+          'displayName': firebaseUser.displayName,
+          'uid': firebaseUser.uid
+        });
+
+        snap = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .get();
+      } else {
+        logger.debug("user exists: $firebaseUser.uid");
+      }
     } catch (e) {
       print("error: " + e.toString());
       return false;
     }
 
-    Navigator.pushReplacementNamed(
-      context,
-      HomeScreen.routeName,
-      arguments: ScreenArguments(user),
-    );
+    AuthClient? googleClient = await gSignIn.authenticatedClient();
+
+    User user;
+    if (googleClient != null) {
+      user = User(snap.id, snap.get('displayName'), googleClient);
+      Navigator.pushReplacementNamed(context, HomeScreen.routeName,
+          arguments: ScreenArguments(user));
+    }
   }
 
-  // TODO remove
   static SnackBar customSnackBar({required String content}) {
     return SnackBar(
       backgroundColor: Colors.black,
@@ -58,28 +70,37 @@ class Authentication with UiLoggy {
   static Future<FirebaseApp> initializeFirebase({
     required BuildContext context,
     required Loggy<UiLoggy> logger,
+    required GoogleSignIn gSignIn,
   }) async {
     FirebaseApp firebaseApp = await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
 
-    User? user = FirebaseAuth.instance.currentUser;
+    fire_auth.User? fUser = fire_auth.FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      onSignIn(context: context, logger: logger, user: user);
+    if (fUser != null) {
+      onSignIn(
+          context: context,
+          logger: logger,
+          firebaseUser: fUser,
+          gSignIn: gSignIn);
     }
 
     return firebaseApp;
   }
 
-  static Future<User?> signInWithGoogle({required BuildContext context}) async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user;
+  static Future<fire_auth.User?> signInWithGoogle(
+      {required BuildContext context, required GoogleSignIn gSignIn}) async {
+    fire_auth.FirebaseAuth auth = fire_auth.FirebaseAuth.instance;
+    fire_auth.User? user;
 
+// if running via web. else...
     if (kIsWeb) {
-      GoogleAuthProvider authProvider = GoogleAuthProvider();
+      // TODO gmail API not enabled/set for web.
+      fire_auth.GoogleAuthProvider authProvider =
+          fire_auth.GoogleAuthProvider();
 
       try {
-        final UserCredential userCredential =
+        final fire_auth.UserCredential userCredential =
             await auth.signInWithPopup(authProvider);
 
         user = userCredential.user;
@@ -87,26 +108,24 @@ class Authentication with UiLoggy {
         print(e);
       }
     } else {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
+      final GoogleSignInAccount? googleSignInAccount = await gSignIn.signIn();
 
       if (googleSignInAccount != null) {
         final GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
+        final fire_auth.AuthCredential credential =
+            fire_auth.GoogleAuthProvider.credential(
           accessToken: googleSignInAuthentication.accessToken,
           idToken: googleSignInAuthentication.idToken,
         );
 
         try {
-          final UserCredential userCredential =
+          final fire_auth.UserCredential userCredential =
               await auth.signInWithCredential(credential);
 
           user = userCredential.user;
-        } on FirebaseAuthException catch (e) {
+        } on fire_auth.FirebaseAuthException catch (e) {
           if (e.code == 'account-exists-with-different-credential') {
             ScaffoldMessenger.of(context).showSnackBar(
               Authentication.customSnackBar(
@@ -142,7 +161,7 @@ class Authentication with UiLoggy {
       if (!kIsWeb) {
         await googleSignIn.signOut();
       }
-      await FirebaseAuth.instance.signOut();
+      await fire_auth.FirebaseAuth.instance.signOut();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         Authentication.customSnackBar(

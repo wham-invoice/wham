@@ -3,6 +3,7 @@ import 'package:loggy/loggy.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wham/screens/invoice_detail_screen.dart';
 import 'package:wham/screens/sign_in_screen.dart';
 import 'package:wham/screens/home_screen.dart';
 import 'package:wham/main_observer.dart';
@@ -66,11 +67,12 @@ class WhamApp extends StatelessWidget {
               create: (context) => PayeCubit(),
               child: const PayEFormScreen(),
             ),
-        '/invoices': (context) => const InvoicesScreen(),
+        InvoicesScreen.routeName: (context) => const InvoicesScreen(),
+        InvoiceDetailScreen.routeName: (context) => const InvoiceDetailScreen(),
         '/new_invoice': (context) => const NewInvoiceScreen(),
         '/new_client': (context) => const NewClientScreen(),
         SignInScreen.routeName: (context) =>
-            Builder(builder: (context) => SignInScreen()),
+            Builder(builder: (context) => const SignInScreen()),
       },
     );
   }

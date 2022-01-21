@@ -1,16 +1,19 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:wham/schema/client.dart';
-import 'package:wham/schema/invoice.dart';
+import 'package:wham/screens/utils.dart';
+import 'package:wham/utils/email.dart';
 
 class InvoiceDetailScreen extends StatelessWidget {
-  const InvoiceDetailScreen({Key? key, required this.invoice})
-      : super(key: key);
+  const InvoiceDetailScreen({Key? key}) : super(key: key);
 
-  final Invoice invoice;
+  static const routeName = '/invoice-details';
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments
+        as InvoiceDetailScreenArguments;
+    final invoice = args.invoice;
+
     final double total = invoice.hours * invoice.rate;
     final double gst = double.parse((total * 0.15).toStringAsFixed(2));
     final double acc = double.parse((total * 0.013).toStringAsFixed(2));
@@ -34,10 +37,6 @@ class InvoiceDetailScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 16),
-                        child: _clientBuilder()),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 16),
@@ -72,24 +71,19 @@ class InvoiceDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 16),
                       child: PlatformElevatedButton(
-                        onPressed: () => print("hi paul"),
+                        onPressed: () => Email.sendEmail(
+                            args.user,
+                            "me",
+                            "rstorr95@gmail.com",
+                            "congrats! on email functionality",
+                            "text/html",
+                            "utf-8",
+                            "base64",
+                            "testing !!! \n\n helloo!"),
                         child: const Text('Email Invoice'),
                       ),
                     ),
                   ]))),
-    );
-  }
-
-  Widget _clientBuilder() {
-    return Center(
-      child: FutureBuilder<Client>(
-          future: invoice.getClient(),
-          builder: (context, snapshot) {
-            String textValue = snapshot.hasData
-                ? snapshot.data!.firstName
-                : "loading client...";
-            return PlatformText(textValue);
-          }),
     );
   }
 }
