@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart' as f_auth;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loggy/loggy.dart';
-import 'package:wham/schema/user.dart';
 
 import 'package:wham/utils/authentication.dart';
 
@@ -23,11 +22,11 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: _isSigningIn
           ? const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
             )
           : OutlinedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.white),
+                backgroundColor: MaterialStateProperty.all(Colors.red),
                 shape: MaterialStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
@@ -41,16 +40,16 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
                 f_auth.User? fUser = await Authentication.signInWithGoogle(
                     context: context, gSignIn: widget.gSignIn);
 
-                setState(() {
-                  _isSigningIn = false;
-                });
-
                 if (fUser != null) {
                   Authentication.onSignIn(
                       context: context,
                       logger: loggy,
                       firebaseUser: fUser,
                       gSignIn: widget.gSignIn);
+                } else {
+                  setState(() {
+                    _isSigningIn = false;
+                  });
                 }
               },
               child: Padding(

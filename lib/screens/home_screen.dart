@@ -15,8 +15,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
 
-    final welcomeBackMsg =
-        "Welcome back " + args.user.displayName + args.user.gClient.toString();
+    final welcomeBackMsg = "Welcome back " + args.user.displayName;
 
     const signOutSnackBar = SnackBar(
       content: Text('Signing out'),

@@ -49,10 +49,12 @@ class Authentication with UiLoggy {
 
     AuthClient? googleClient = await gSignIn.authenticatedClient();
 
-    User user = User(snap.id, snap.get('displayName'), googleClient!);
-
-    Navigator.pushReplacementNamed(context, HomeScreen.routeName,
-        arguments: ScreenArguments(user));
+    User user;
+    if (googleClient != null) {
+      user = User(snap.id, snap.get('displayName'), googleClient);
+      Navigator.pushReplacementNamed(context, HomeScreen.routeName,
+          arguments: ScreenArguments(user));
+    }
   }
 
   static SnackBar customSnackBar({required String content}) {
