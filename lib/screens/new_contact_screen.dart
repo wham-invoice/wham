@@ -1,16 +1,18 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wham/schema/client.dart';
+import 'package:wham/schema/contact.dart';
 
-class NewClientScreen extends StatefulWidget {
-  const NewClientScreen({Key? key}) : super(key: key);
+class NewContactScreen extends StatefulWidget {
+  const NewContactScreen({Key? key}) : super(key: key);
+
+  static const routeName = '/new-contact';
 
   @override
-  State<NewClientScreen> createState() => _NewClientScreenState();
+  State<NewContactScreen> createState() => _NewContactScreenState();
 }
 
-class _NewClientScreenState extends State<NewClientScreen> {
+class _NewContactScreenState extends State<NewContactScreen> {
   final firstNameTC = TextEditingController();
   final lastNameTC = TextEditingController();
   final emailTC = TextEditingController();
@@ -29,8 +31,8 @@ class _NewClientScreenState extends State<NewClientScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Future<void> _addClient() {
-      final Client client = Client(
+    Future<void> _addContact() {
+      final Contact client = Contact(
         firstNameTC.text,
         lastNameTC.text,
         emailTC.text,
@@ -93,7 +95,7 @@ class _NewClientScreenState extends State<NewClientScreen> {
                       controller: emailTC, keyboardType: TextInputType.text),
                 ),
                 PlatformTextButton(
-                  onPressed: _addClient,
+                  onPressed: _addContact,
                   child: const Text('Save'),
                 ),
               ]),

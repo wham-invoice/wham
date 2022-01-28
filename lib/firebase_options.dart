@@ -58,6 +58,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '202888499185',
     projectId: 'wham-ad61b',
     storageBucket: 'wham-ad61b.appspot.com',
+    androidClientId: '202888499185-b9q6l6icl4fd63hp455gnec0lm5igbt0.apps.googleusercontent.com',
     iosClientId: '202888499185-0gb3rgla3iog2khir32fumso874e9o50.apps.googleusercontent.com',
     iosBundleId: 'com.example.wham',
   );
@@ -68,6 +69,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '202888499185',
     projectId: 'wham-ad61b',
     storageBucket: 'wham-ad61b.appspot.com',
+    androidClientId: '202888499185-b9q6l6icl4fd63hp455gnec0lm5igbt0.apps.googleusercontent.com',
     iosClientId: '202888499185-0gb3rgla3iog2khir32fumso874e9o50.apps.googleusercontent.com',
     iosBundleId: 'com.example.wham',
   );

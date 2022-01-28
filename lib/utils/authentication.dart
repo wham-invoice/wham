@@ -5,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:loggy/loggy.dart';
 import 'package:wham/firebase_options.dart';
 import 'package:wham/schema/user.dart';
@@ -13,11 +12,15 @@ import 'package:wham/screens/home_screen.dart';
 import 'package:wham/screens/utils.dart';
 
 class Authentication with UiLoggy {
+  // onSignIn takes a FirebaseUser and a google AuthClient then get/sets
+  // the user in our users firestore.
+  // We initiate the user member then call pushReplacementNamed to direct
+  // to the HomeScreen (passing in the new User).
   static onSignIn(
       {required BuildContext context,
       required Loggy<UiLoggy> logger,
       required fire_auth.User firebaseUser,
-      required GoogleSignIn gSignIn}) async {
+      required AuthClient googleClient}) async {
     DocumentSnapshot snap;
     try {
       snap = await FirebaseFirestore.instance
@@ -42,18 +45,14 @@ class Authentication with UiLoggy {
       } else {
         logger.debug("user exists: $firebaseUser.uid");
       }
-    } catch (e) {
-      print("error: " + e.toString());
-      return false;
-    }
 
-    AuthClient? googleClient = await gSignIn.authenticatedClient();
+      User user = User(snap.id, snap.get('displayName'), googleClient);
 
-    User user;
-    if (googleClient != null) {
-      user = User(snap.id, snap.get('displayName'), googleClient);
       Navigator.pushReplacementNamed(context, HomeScreen.routeName,
           arguments: ScreenArguments(user));
+    } catch (e) {
+      logger.error(e.toString());
+      return false;
     }
   }
 
@@ -67,7 +66,9 @@ class Authentication with UiLoggy {
     );
   }
 
-  static Future<FirebaseApp> initializeFirebase({
+  //initializeFirebase returns the FirebaseApp and calls onSignIn if a logged in FirebaseUser already
+  //exists.
+  static Future<FirebaseApp> initialize({
     required BuildContext context,
     required Loggy<UiLoggy> logger,
     required GoogleSignIn gSignIn,
@@ -75,23 +76,18 @@ class Authentication with UiLoggy {
     FirebaseApp firebaseApp = await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
 
-    fire_auth.User? fUser = fire_auth.FirebaseAuth.instance.currentUser;
-
-    if (fUser != null) {
-      onSignIn(
-          context: context,
-          logger: logger,
-          firebaseUser: fUser,
-          gSignIn: gSignIn);
-    }
-
     return firebaseApp;
   }
 
-  static Future<fire_auth.User?> signInWithGoogle(
-      {required BuildContext context, required GoogleSignIn gSignIn}) async {
+  static Future<fire_auth.User?> signIntoFirebase(
+      {required BuildContext context,
+      required GoogleSignInAuthentication googleSignInAuthentication}) async {
     fire_auth.FirebaseAuth auth = fire_auth.FirebaseAuth.instance;
-    fire_auth.User? user;
+    fire_auth.User? user = fire_auth.FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      return user;
+    }
 
 // if running via web. else...
     if (kIsWeb) {
@@ -108,46 +104,37 @@ class Authentication with UiLoggy {
         print(e);
       }
     } else {
-      final GoogleSignInAccount? googleSignInAccount = await gSignIn.signIn();
+      final fire_auth.AuthCredential credential =
+          fire_auth.GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
 
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
+      try {
+        final fire_auth.UserCredential userCredential =
+            await auth.signInWithCredential(credential);
 
-        final fire_auth.AuthCredential credential =
-            fire_auth.GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
-        );
-
-        try {
-          final fire_auth.UserCredential userCredential =
-              await auth.signInWithCredential(credential);
-
-          user = userCredential.user;
-        } on fire_auth.FirebaseAuthException catch (e) {
-          if (e.code == 'account-exists-with-different-credential') {
-            ScaffoldMessenger.of(context).showSnackBar(
-              Authentication.customSnackBar(
-                content:
-                    'The account already exists with a different credential',
-              ),
-            );
-          } else if (e.code == 'invalid-credential') {
-            ScaffoldMessenger.of(context).showSnackBar(
-              Authentication.customSnackBar(
-                content:
-                    'Error occurred while accessing credentials. Try again.',
-              ),
-            );
-          }
-        } catch (e) {
+        user = userCredential.user;
+      } on fire_auth.FirebaseAuthException catch (e) {
+        if (e.code == 'account-exists-with-different-credential') {
           ScaffoldMessenger.of(context).showSnackBar(
             Authentication.customSnackBar(
-              content: 'Error occurred using Google Sign In. Try again.',
+              content: 'The account already exists with a different credential',
+            ),
+          );
+        } else if (e.code == 'invalid-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            Authentication.customSnackBar(
+              content: 'Error occurred while accessing credentials. Try again.',
             ),
           );
         }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          Authentication.customSnackBar(
+            content: 'Error occurred using Google Sign In. Try again.',
+          ),
+        );
       }
     }
 

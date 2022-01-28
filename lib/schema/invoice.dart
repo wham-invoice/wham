@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wham/schema/client.dart';
+import 'package:wham/schema/contact.dart';
 
 class Invoice {
   String? id;
@@ -37,7 +37,7 @@ class Invoice {
     return rate * hours;
   }
 
-  Future<Client> getClient() async {
-    return await getClientFromID(clientID);
+  Future<Contact> getClient() async {
+    return await getContactFromID(clientID);
   }
 }

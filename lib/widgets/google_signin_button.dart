@@ -1,9 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart' as f_auth;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loggy/loggy.dart';
-
-import 'package:wham/utils/authentication.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   final GoogleSignIn gSignIn;
@@ -37,16 +34,11 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
                 setState(() {
                   _isSigningIn = true;
                 });
-                f_auth.User? fUser = await Authentication.signInWithGoogle(
-                    context: context, gSignIn: widget.gSignIn);
+                GoogleSignIn googleSignIn = widget.gSignIn;
+                GoogleSignInAccount? googleSignInAccount =
+                    await googleSignIn.signIn();
 
-                if (fUser != null) {
-                  Authentication.onSignIn(
-                      context: context,
-                      logger: loggy,
-                      firebaseUser: fUser,
-                      gSignIn: widget.gSignIn);
-                } else {
+                if (googleSignInAccount == null) {
                   setState(() {
                     _isSigningIn = false;
                   });

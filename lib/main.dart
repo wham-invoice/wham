@@ -9,7 +9,7 @@ import 'package:wham/screens/home_screen.dart';
 import 'package:wham/main_observer.dart';
 import 'package:wham/paye/paye_cubit.dart';
 import 'package:wham/paye/paye_screen.dart';
-import 'package:wham/screens/new_client_screen.dart';
+import 'package:wham/screens/new_contact_screen.dart';
 
 import 'screens/invoices_screen.dart';
 import 'screens/new_invoice_screen.dart';
@@ -70,7 +70,7 @@ class WhamApp extends StatelessWidget {
         InvoicesScreen.routeName: (context) => const InvoicesScreen(),
         InvoiceDetailScreen.routeName: (context) => const InvoiceDetailScreen(),
         '/new_invoice': (context) => const NewInvoiceScreen(),
-        '/new_client': (context) => const NewClientScreen(),
+        '/new_client': (context) => const NewContactScreen(),
         SignInScreen.routeName: (context) =>
             Builder(builder: (context) => const SignInScreen()),
       },
