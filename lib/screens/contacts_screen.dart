@@ -2,26 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
-import 'package:wham/schema/invoice.dart';
-import 'package:wham/screens/invoice_detail_screen.dart';
+import 'package:wham/schema/contact.dart';
 import 'package:wham/screens/utils.dart';
 
-class InvoicesScreen extends StatefulWidget {
-  const InvoicesScreen({Key? key}) : super(key: key);
+class ContactsScreen extends StatefulWidget {
+  const ContactsScreen({Key? key}) : super(key: key);
 
-  static const routeName = '/invoices';
+  static const routeName = '/contacts';
 
   @override
-  State<InvoicesScreen> createState() => _InvoicesScreenState();
+  State<ContactsScreen> createState() => _ContactsScreenState();
 }
 
-class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
+class _ContactsScreenState extends State<ContactsScreen> with UiLoggy {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
 
-    final Stream<QuerySnapshot> _invoicesStream = FirebaseFirestore.instance
-        .collection('invoices')
+    final Stream<QuerySnapshot> _contactsStream = FirebaseFirestore.instance
+        .collection('contacts')
         .where("user_id", isEqualTo: args.signedInUser.id)
         .snapshots();
 
@@ -30,7 +29,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
         iosContentPadding: false,
         iosContentBottomPadding: false,
         body: StreamBuilder<QuerySnapshot>(
-            stream: _invoicesStream,
+            stream: _contactsStream,
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
@@ -42,23 +41,18 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
                 return PlatformText("Loading");
               }
 
-              List<Invoice> invoices = [];
+              List<Contact> contacts = [];
               for (final doc in snapshot.data!.docs) {
-                invoices.add(Invoice.fromSnapshot(doc));
+                contacts.add(Contact.fromSnapshot(doc));
               }
 
               return ListView.builder(
-                  itemCount: invoices.length,
+                  itemCount: contacts.length,
                   itemBuilder: (context, index) => PlatformListTile(
-                      title: PlatformText(invoices[index].dueDate.toString()),
-                      subtitle:
-                          PlatformText(invoices[index].getTotal().toString()),
-                      onTap: () => {
-                            Navigator.pushNamed(
-                                context, InvoiceDetailScreen.routeName,
-                                arguments: InvoiceDetailScreenArguments(
-                                    invoices[index], args.signedInUser))
-                          }));
+                      title: PlatformText(
+                          "${contacts[index].firstName} ${contacts[index].lastName}"),
+                      subtitle: PlatformText(contacts[index].email),
+                      onTap: () => loggy.info("implement details screen")));
             }));
   }
 }

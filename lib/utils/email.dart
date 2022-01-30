@@ -1,27 +1,35 @@
 import 'dart:convert';
 
-import 'package:loggy/loggy.dart';
 import 'package:googleapis/gmail/v1.dart';
 import 'package:wham/schema/user.dart';
+import 'package:wham/schema/contact.dart';
 
-class Email with UiLoggy {
-  static sendEmail(User user, String from, to, subject, contentType, charset,
-      contentTransferEncoding, emailContent) async {
+class Email {
+  static String fromUser = "me";
+
+  static sendEmailAsUser(
+      User user,
+      Contact to,
+      String subject,
+      String contentType,
+      String charset,
+      String contentTransferEncoding,
+      String emailContent) async {
     GmailApi gmailApi = GmailApi(user.gClient);
+
+    String receiptiantAddress = to.email;
 
     await gmailApi.users.messages.send(
         Message.fromJson({
           'raw': getBase64Email(
-              source: 'From: $from\r\n'
-                  'To: $to\r\n'
+              source: 'From: $fromUser\r\n'
+                  'To: $receiptiantAddress\r\n'
                   'Subject: $subject\r\n'
                   'Content-Type: $contentType; charset=$charset\r\n'
                   'Content-Transfer-Encoding: $contentTransferEncoding\r\n\r\n'
                   '$emailContent'),
         }),
-        from);
-
-    print("email sent ");
+        fromUser);
   }
 
   static String getBase64Email({String source = ""}) {

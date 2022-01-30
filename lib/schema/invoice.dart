@@ -3,7 +3,8 @@ import 'package:wham/schema/contact.dart';
 
 class Invoice {
   String? id;
-  final String clientID;
+  final String contactID;
+  final String userID;
   final double rate;
   final double hours;
   final String description;
@@ -11,13 +12,14 @@ class Invoice {
   final bool
       paid; //TODO: make this a enum/class with paid/open/overdue etc states.
 
-  Invoice(this.clientID, this.rate, this.hours, this.description, this.dueDate,
-      this.paid,
+  Invoice(this.contactID, this.userID, this.rate, this.hours, this.description,
+      this.dueDate, this.paid,
       [this.id]);
 
   Invoice.fromSnapshot(DocumentSnapshot snapshot)
       : id = snapshot.id,
-        clientID = snapshot["client_id"],
+        contactID = snapshot["contact_id"],
+        userID = snapshot["user_id"],
         rate = snapshot["rate"],
         hours = snapshot["hours"],
         description = snapshot["description"],
@@ -25,7 +27,8 @@ class Invoice {
         paid = snapshot["paid"];
 
   Map<String, dynamic> toJson() => {
-        'client_id': clientID,
+        'contact_id': contactID,
+        'user_id': userID,
         'rate': rate,
         'hours': hours,
         'description': description,
@@ -38,6 +41,6 @@ class Invoice {
   }
 
   Future<Contact> getClient() async {
-    return await getContactFromID(clientID);
+    return await getContactFromID(contactID);
   }
 }

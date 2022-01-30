@@ -2,9 +2,9 @@ import 'package:wham/schema/invoice.dart';
 import 'package:wham/schema/user.dart';
 
 class ScreenArguments {
-  final User user;
+  final User signedInUser;
 
-  ScreenArguments(this.user);
+  ScreenArguments(this.signedInUser);
 }
 
 class InvoiceDetailScreenArguments {

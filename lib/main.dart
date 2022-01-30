@@ -10,8 +10,8 @@ import 'package:wham/main_observer.dart';
 import 'package:wham/paye/paye_cubit.dart';
 import 'package:wham/paye/paye_screen.dart';
 import 'package:wham/screens/new_contact_screen.dart';
-
 import 'screens/invoices_screen.dart';
+import 'screens/contacts_screen.dart';
 import 'screens/new_invoice_screen.dart';
 
 final materialThemeData = ThemeData(
@@ -60,7 +60,7 @@ class WhamApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       materialTheme: materialThemeData,
       cupertinoTheme: cupertinoTheme,
-      initialRoute: '/sign-in',
+      initialRoute: SignInScreen.routeName,
       routes: {
         HomeScreen.routeName: (context) => const HomeScreen(),
         '/paye_calculator': (context) => BlocProvider(
@@ -69,8 +69,9 @@ class WhamApp extends StatelessWidget {
             ),
         InvoicesScreen.routeName: (context) => const InvoicesScreen(),
         InvoiceDetailScreen.routeName: (context) => const InvoiceDetailScreen(),
-        '/new_invoice': (context) => const NewInvoiceScreen(),
-        '/new_client': (context) => const NewContactScreen(),
+        NewInvoiceScreen.routeName: (context) => const NewInvoiceScreen(),
+        ContactsScreen.routeName: (context) => const ContactsScreen(),
+        NewContactScreen.routeName: (context) => const NewContactScreen(),
         SignInScreen.routeName: (context) =>
             Builder(builder: (context) => const SignInScreen()),
       },

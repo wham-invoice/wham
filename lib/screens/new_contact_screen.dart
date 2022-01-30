@@ -1,7 +1,9 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:loggy/loggy.dart';
 import 'package:wham/schema/contact.dart';
+import 'package:wham/screens/utils.dart';
 
 class NewContactScreen extends StatefulWidget {
   const NewContactScreen({Key? key}) : super(key: key);
@@ -12,13 +14,13 @@ class NewContactScreen extends StatefulWidget {
   State<NewContactScreen> createState() => _NewContactScreenState();
 }
 
-class _NewContactScreenState extends State<NewContactScreen> {
+class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
   final firstNameTC = TextEditingController();
   final lastNameTC = TextEditingController();
   final emailTC = TextEditingController();
   final addSuccessSB =
-      const SnackBar(content: Text('Client added successfully.'));
-  final addFailSB = const SnackBar(content: Text('Failed to add client.'));
+      const SnackBar(content: Text('Contact added successfully.'));
+  final addFailSB = const SnackBar(content: Text('Failed to add contact.'));
 
   @override
   void dispose() {
@@ -31,21 +33,23 @@ class _NewContactScreenState extends State<NewContactScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
     Future<void> _addContact() {
-      final Contact client = Contact(
+      final Contact contact = Contact(
+        args.signedInUser.id,
         firstNameTC.text,
         lastNameTC.text,
         emailTC.text,
       );
 
       return FirebaseFirestore.instance
-          .collection('clients')
-          .add(client.toJson())
+          .collection('contacts')
+          .add(contact.toJson())
           .then((value) {
         ScaffoldMessenger.of(context).showSnackBar(addSuccessSB);
         Navigator.pop(context);
       }).catchError((error) {
-        print("Failed to add client: $error");
+        loggy.error("Failed to add contact: $error");
         ScaffoldMessenger.of(context).showSnackBar(addFailSB);
         Navigator.pop(context);
       });
