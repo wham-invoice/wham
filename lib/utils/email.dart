@@ -6,33 +6,30 @@ import 'package:wham/schema/contact.dart';
 
 class Email {
   static String fromUser = "me";
+  static String defaultMessageSubject = "Default Subject...";
+  static String defaultMessageBody = "Default Body...";
 
+  //sendEmailAsUser sends a text/html email from 'user' to 'receiptiant'
   static sendEmailAsUser(
-      User user,
-      Contact to,
-      String subject,
-      String contentType,
-      String charset,
-      String contentTransferEncoding,
-      String emailContent) async {
-    GmailApi gmailApi = GmailApi(user.gClient);
+      User user, Contact receiptiant, String subject, String body) async {
+    GmailApi _gmailApi = GmailApi(user.gClient);
 
-    String receiptiantAddress = to.email;
+    String _receiptiantAddress = receiptiant.email;
 
-    await gmailApi.users.messages.send(
+    await _gmailApi.users.messages.send(
         Message.fromJson({
-          'raw': getBase64Email(
+          'raw': _getBase64Email(
               source: 'From: $fromUser\r\n'
-                  'To: $receiptiantAddress\r\n'
+                  'To: $_receiptiantAddress\r\n'
                   'Subject: $subject\r\n'
-                  'Content-Type: $contentType; charset=$charset\r\n'
-                  'Content-Transfer-Encoding: $contentTransferEncoding\r\n\r\n'
-                  '$emailContent'),
+                  'Content-Type: text/html; charset=utf-8\r\n'
+                  'Content-Transfer-Encoding: base64\r\n\r\n'
+                  '$body'),
         }),
         fromUser);
   }
 
-  static String getBase64Email({String source = ""}) {
+  static String _getBase64Email({String source = ""}) {
     List<int> bytes = utf8.encode(source);
 
     return base64UrlEncode(bytes);

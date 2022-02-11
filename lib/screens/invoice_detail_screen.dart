@@ -116,11 +116,8 @@ class InvoiceDisplay extends StatelessWidget with UiLoggy {
                       await Email.sendEmailAsUser(
                           signedInUser,
                           invoiceClient,
-                          "congrats! on email functionality",
-                          "text/html",
-                          "utf-8",
-                          "base64",
-                          "testing !!! \n\n helloo!");
+                          Email.defaultMessageSubject,
+                          Email.defaultMessageBody);
 
                       ScaffoldMessenger.of(context)
                           .showSnackBar(emailedInvoiceSB);
