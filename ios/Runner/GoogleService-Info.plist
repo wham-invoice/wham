@@ -5,7 +5,7 @@
 	<key>CLIENT_ID</key>
 	<string>202888499185-0gb3rgla3iog2khir32fumso874e9o50.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.202888499185-0gb3rgla3iog2khir32fumso874e9o50</string>
+	<string>googleusercontent.com.apps.202888499185-0gb3rgla3iog2khir32fumso874e9o50</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBw3rlf9XPYonNuo7ZpABNq2fjcfTPvWg4</string>
 	<key>GCM_SENDER_ID</key>
@@ -19,16 +19,18 @@
 	<key>STORAGE_BUCKET</key>
 	<string>wham-ad61b.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:202888499185:ios:07bf0d4bca473e65837e50</string>
+	<key>SERVER_CLIENT_ID</key>
+	<string>202888499185-m6oem5t2kod3odtfptd5ogo4jdemushh.apps.googleusercontent.com</string>
 </dict>
 </plist>

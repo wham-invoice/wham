@@ -1,14 +1,19 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis_auth/auth_io.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fire_auth;
-import 'package:firebase_core/firebase_core.dart';
+import 'package:wham/schema/user.dart';
 import 'package:googleapis/gmail/v1.dart';
 import 'package:loggy/loggy.dart';
-import 'package:wham/utils/authentication.dart';
-import 'package:wham/widgets/google_signin_button.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:wham/utils/authentication.dart';
+import 'package:wham/utils/session.dart';
+import 'package:wham/utils/snackbar.dart';
+import 'package:wham/screens/utils.dart';
+import 'package:wham/widgets/google_signin_button.dart';
+import 'package:wham/screens/home_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   static const routeName = '/sign-in';
@@ -29,7 +34,6 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
 //marks the instance as overriding superclass member.
   @override
   void initState() {
-    // super calls base class initState
     super.initState();
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       if (account != null) {
@@ -40,39 +44,62 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
     });
   }
 
-  //initialize starts the firebase and google sign in flow. We create the firebase app.
-  //Then we see if a google user is signed in. If so we attempt to get signed in firebase user.
-  //Last we call the onSignIn func.
-  Future<FirebaseApp> initialize({
+  Future<http.Response> backendAuth(Session s, String code) => s.post(
+      'http://localhost:8080/auth', jsonEncode(<String, String>{'code': code}));
+
+  //Attempts to sign in a previously authenticated user without interaction.
+  //If the currently signed in user errors whilst authenticating w BE we sign out.
+  Future<void> _attemptSilentSignIn({
     required BuildContext context,
     required Loggy<UiLoggy> logger,
     required GoogleSignIn gSignIn,
   }) async {
-    FirebaseApp fApp = await Authentication.initialize(
-        context: context, logger: logger, gSignIn: gSignIn);
+    final Session session = Session();
 
     await _googleSignIn.signInSilently();
 
-    if (_currentGoogleUser != null) {
-      AuthClient? googleClient = await _googleSignIn.authenticatedClient();
-      GoogleSignInAuthentication? auth =
-          await _currentGoogleUser!.authentication;
+    if (_currentGoogleUser == null) return;
 
-      fire_auth.User? _firebaseUser = await Authentication.signIntoFirebase(
-          context: context, googleSignInAuthentication: auth);
-
-      if (_firebaseUser != null && googleClient != null) {
-        Authentication.onSignIn(
-            context: context,
-            logger: logger,
-            firebaseUser: _firebaseUser,
-            googleClient: googleClient);
-      } else {
-        logger.error("unexpected null firebaseUser || googleClient.");
+    try {
+      loggy.info("user ${_currentGoogleUser}");
+      String? serverCode = _currentGoogleUser!.serverAuthCode;
+      if (serverCode == null || serverCode == "") {
+        throw Exception("expected server code");
       }
-    }
+      // Authenticate with wham backend.
+      final http.Response resp = await backendAuth(session, serverCode);
+      if (resp.statusCode != 200) {
+        throw Exception(
+            "authenticate with platform: ${resp.statusCode} ${resp.reasonPhrase}");
+      }
+      loggy.info(resp.toString());
 
-    return fApp;
+      final AuthClient? googleClient =
+          await _googleSignIn.authenticatedClient();
+      if (googleClient == null) {
+        throw Exception("expected google client.");
+      }
+
+      final GoogleSignInAuthentication? auth =
+          await _currentGoogleUser!.authentication;
+      if (auth == null) {
+        throw Exception("expected google signin auth.");
+      }
+
+      final user = await Authentication.getUser(
+          context: context,
+          logger: logger,
+          auth: auth,
+          googleClient: googleClient,
+          session: session);
+
+      Navigator.pushReplacementNamed(context, HomeScreen.routeName,
+          arguments: ScreenArguments(user));
+    } on Exception catch (e, s) {
+      loggy.error(e.toString());
+      loggy.error(s.toString());
+      //     await Authentication.signOut(context: context);
+    }
   }
 
   @override
@@ -90,19 +117,20 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
             children: [
               Row(),
               FutureBuilder(
-                future: initialize(
+                future: _attemptSilentSignIn(
                     context: context, logger: loggy, gSignIn: _googleSignIn),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return const Text('Error initializing Firebase');
-                  } else if (snapshot.connectionState == ConnectionState.done) {
+                    loggy.error(snapshot.error);
+                    Snack.errorSnackBar(
+                        content: "Error signing in ${snapshot.error}");
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.done) {
                     return GoogleSignInButton(_googleSignIn);
                   }
-                  return const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.orange,
-                    ),
-                  );
+
+                  return const Text("Loading");
                 },
               ),
             ],

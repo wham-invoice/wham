@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformText(welcomeBackMsg),
+                  child: Text(welcomeBackMsg),
                 ),
                 Padding(
                   padding:

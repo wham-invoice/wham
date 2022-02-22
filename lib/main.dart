@@ -7,15 +7,13 @@ import 'package:wham/screens/invoice_detail_screen.dart';
 import 'package:wham/screens/sign_in_screen.dart';
 import 'package:wham/screens/home_screen.dart';
 import 'package:wham/main_observer.dart';
-import 'package:wham/paye/paye_cubit.dart';
-import 'package:wham/paye/paye_screen.dart';
 import 'package:wham/screens/new_contact_screen.dart';
 import 'screens/invoices_screen.dart';
 import 'screens/contacts_screen.dart';
 import 'screens/new_invoice_screen.dart';
 
 final materialThemeData = ThemeData(
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: Colors.black26,
     appBarTheme: AppBarTheme(color: Colors.blue.shade600),
     primaryColor: Colors.blue,
     secondaryHeaderColor: Colors.blue,
@@ -26,10 +24,15 @@ final materialThemeData = ThemeData(
     colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
         .copyWith(secondary: Colors.blue));
 
-const cupertinoTheme = CupertinoThemeData(
+const cupertinoThemeData = CupertinoThemeData(
     primaryColor: Colors.red,
-    barBackgroundColor: Colors.white,
-    scaffoldBackgroundColor: Colors.white);
+    barBackgroundColor: CupertinoColors.black,
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: Color.fromRGBO(13, 28, 56, 1.0),
+    textTheme: CupertinoTextThemeData(
+      primaryColor: CupertinoColors.white,
+      textStyle: TextStyle(color: CupertinoColors.white),
+    ));
 
 void main() {
   Loggy.initLoggy(
@@ -53,28 +56,22 @@ class WhamApp extends StatelessWidget {
   const WhamApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    const appTitle = 'Wham!';
-    return PlatformSnackApp(
-      title: appTitle,
-      debugShowCheckedModeBanner: false,
-      materialTheme: materialThemeData,
-      cupertinoTheme: cupertinoTheme,
-      initialRoute: SignInScreen.routeName,
-      routes: {
-        HomeScreen.routeName: (context) => const HomeScreen(),
-        '/paye_calculator': (context) => BlocProvider(
-              create: (context) => PayeCubit(),
-              child: const PayEFormScreen(),
-            ),
-        InvoicesScreen.routeName: (context) => const InvoicesScreen(),
-        InvoiceDetailScreen.routeName: (context) => const InvoiceDetailScreen(),
-        NewInvoiceScreen.routeName: (context) => const NewInvoiceScreen(),
-        ContactsScreen.routeName: (context) => const ContactsScreen(),
-        NewContactScreen.routeName: (context) => const NewContactScreen(),
-        SignInScreen.routeName: (context) =>
-            Builder(builder: (context) => const SignInScreen()),
-      },
-    );
-  }
+  Widget build(BuildContext context) => PlatformSnackApp(
+        title: 'Wham!',
+        debugShowCheckedModeBanner: false,
+        materialTheme: materialThemeData,
+        cupertinoTheme: cupertinoThemeData,
+        initialRoute: SignInScreen.routeName,
+        routes: {
+          HomeScreen.routeName: (context) => const HomeScreen(),
+          InvoicesScreen.routeName: (context) => const InvoicesScreen(),
+          InvoiceDetailScreen.routeName: (context) =>
+              const InvoiceDetailScreen(),
+          NewInvoiceScreen.routeName: (context) => const NewInvoiceScreen(),
+          ContactsScreen.routeName: (context) => const ContactsScreen(),
+          NewContactScreen.routeName: (context) => const NewContactScreen(),
+          SignInScreen.routeName: (context) =>
+              Builder(builder: (context) => const SignInScreen()),
+        },
+      );
 }

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer' as developer;
+import 'package:loggy/loggy.dart';
 import 'package:wham/schema/contact.dart';
 
-class Invoice {
+class Invoice with UiLoggy {
   String? id;
   final String contactID;
   final String userID;
@@ -40,7 +42,12 @@ class Invoice {
     return rate * hours;
   }
 
-  Future<Contact> getClient() async {
-    return await getContactFromID(contactID);
+  Future<Contact> getContact() async {
+    loggy.info("invoice: $id - getting contact $contactID");
+    developer.log("invoice: $id - getting contact $contactID",
+        stackTrace: StackTrace.current);
+    final Contact c = await getContactFromID(contactID);
+
+    return c;
   }
 }

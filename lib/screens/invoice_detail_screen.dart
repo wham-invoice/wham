@@ -1,5 +1,6 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import 'package:loggy/loggy.dart';
 import 'package:wham/screens/utils.dart';
 import 'package:wham/screens/home_screen.dart';
@@ -18,19 +19,23 @@ class InvoiceDetailScreen extends StatelessWidget {
     final args = ModalRoute.of(context)!.settings.arguments
         as InvoiceDetailScreenArguments;
     final invoice = args.invoice;
-    //TODO need to wait for invoice.getClient to complete before showing invoiceinvoice.getClient to complete before showing invoice.
 
     return PlatformScaffold(
         appBar: PlatformAppBar(),
         body: SingleChildScrollView(
             child: FutureBuilder(
-                future: invoice.getClient(),
+                future: invoice.getContact(),
                 builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    //TODO gracefully exit
+                    developer.log("unable to get contact",
+                        error: snapshot.error);
+                  }
                   if (snapshot.hasData) {
                     return InvoiceDisplay(
                         invoice: args.invoice,
                         invoiceClient: snapshot.data! as Contact,
-                        signedInUser: args.user);
+                        user: args.user);
                   }
                   return const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -42,7 +47,7 @@ class InvoiceDetailScreen extends StatelessWidget {
 
 class InvoiceDisplay extends StatelessWidget with UiLoggy {
   final Invoice invoice;
-  final User signedInUser;
+  final User user;
   final Contact invoiceClient;
 
   final emailedInvoiceSB =
@@ -51,7 +56,7 @@ class InvoiceDisplay extends StatelessWidget with UiLoggy {
   const InvoiceDisplay(
       {Key? key,
       required this.invoice,
-      required this.signedInUser,
+      required this.user,
       required this.invoiceClient})
       : super(key: key);
 
@@ -113,17 +118,18 @@ class InvoiceDisplay extends StatelessWidget with UiLoggy {
                 child: PlatformElevatedButton(
                   onPressed: () async {
                     try {
-                      await Email.sendEmailAsUser(
-                          signedInUser,
-                          invoiceClient,
-                          Email.defaultMessageSubject,
-                          Email.defaultMessageBody);
+                      //  await Email.sendEmailAsUser(
+                      //      signedInUser,
+                      //      invoiceClient,
+                      //      Email.defaultMessageSubject,
+                      //      Email.defaultMessageBody);
 
+                      Email.sendInvoiceEmail(user.session, invoice.id!);
                       ScaffoldMessenger.of(context)
                           .showSnackBar(emailedInvoiceSB);
                       Navigator.pushReplacementNamed(
                           context, HomeScreen.routeName,
-                          arguments: ScreenArguments(signedInUser));
+                          arguments: ScreenArguments(user));
                     } catch (e) {
                       loggy.error(e);
                     }
