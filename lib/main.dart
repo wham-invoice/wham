@@ -12,28 +12,6 @@ import 'screens/invoices_screen.dart';
 import 'screens/contacts_screen.dart';
 import 'screens/new_invoice_screen.dart';
 
-final materialThemeData = ThemeData(
-    scaffoldBackgroundColor: Colors.black26,
-    appBarTheme: AppBarTheme(color: Colors.blue.shade600),
-    primaryColor: Colors.blue,
-    secondaryHeaderColor: Colors.blue,
-    canvasColor: Colors.blue,
-    backgroundColor: Colors.red,
-    textTheme:
-        const TextTheme().copyWith(bodyText1: const TextTheme().bodyText2),
-    colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
-        .copyWith(secondary: Colors.blue));
-
-const cupertinoThemeData = CupertinoThemeData(
-    primaryColor: Colors.red,
-    barBackgroundColor: CupertinoColors.black,
-    brightness: Brightness.light,
-    scaffoldBackgroundColor: Color.fromRGBO(13, 28, 56, 1.0),
-    textTheme: CupertinoTextThemeData(
-      primaryColor: CupertinoColors.white,
-      textStyle: TextStyle(color: CupertinoColors.white),
-    ));
-
 void main() {
   Loggy.initLoggy(
     logPrinter: const PrettyPrinter(
@@ -52,26 +30,52 @@ void main() {
   );
 }
 
-class WhamApp extends StatelessWidget {
+class WhamApp extends StatefulWidget {
   const WhamApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => PlatformSnackApp(
-        title: 'Wham!',
-        debugShowCheckedModeBanner: false,
-        materialTheme: materialThemeData,
-        cupertinoTheme: cupertinoThemeData,
-        initialRoute: SignInScreen.routeName,
-        routes: {
-          HomeScreen.routeName: (context) => const HomeScreen(),
-          InvoicesScreen.routeName: (context) => const InvoicesScreen(),
-          InvoiceDetailScreen.routeName: (context) =>
-              const InvoiceDetailScreen(),
-          NewInvoiceScreen.routeName: (context) => const NewInvoiceScreen(),
-          ContactsScreen.routeName: (context) => const ContactsScreen(),
-          NewContactScreen.routeName: (context) => const NewContactScreen(),
-          SignInScreen.routeName: (context) =>
-              Builder(builder: (context) => const SignInScreen()),
-        },
-      );
+  _WhamAppState createState() => _WhamAppState();
+}
+
+class _WhamAppState extends State {
+  @override
+  Widget build(BuildContext context) {
+    final materialTheme = ThemeData(
+      primarySwatch: Colors.blue,
+      textTheme: Typography.whiteMountainView,
+      brightness: Brightness.dark,
+    );
+
+    return Theme(
+      data: materialTheme,
+      child: PlatformProvider(
+        //initialPlatform: TargetPlatform.android,
+        settings: PlatformSettingsData(iosUsesMaterialWidgets: true),
+        builder: (context) => PlatformSnackApp(
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+            DefaultCupertinoLocalizations.delegate,
+          ],
+          title: 'Wham',
+          debugShowCheckedModeBanner: false,
+          materialTheme: materialTheme,
+          cupertinoTheme:
+              MaterialBasedCupertinoThemeData(materialTheme: materialTheme),
+          initialRoute: SignInScreen.routeName,
+          routes: {
+            HomeScreen.routeName: (context) => const HomeScreen(),
+            InvoicesScreen.routeName: (context) => const InvoicesScreen(),
+            InvoiceDetailScreen.routeName: (context) =>
+                const InvoiceDetailScreen(),
+            NewInvoiceScreen.routeName: (context) => const NewInvoiceScreen(),
+            ContactsScreen.routeName: (context) => const ContactsScreen(),
+            NewContactScreen.routeName: (context) => const NewContactScreen(),
+            SignInScreen.routeName: (context) =>
+                Builder(builder: (context) => const SignInScreen()),
+          },
+        ),
+      ),
+    );
+  }
 }

@@ -50,9 +50,11 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
               return ListView.builder(
                   itemCount: invoices.length,
                   itemBuilder: (context, index) => PlatformListTile(
-                      title: PlatformText(invoices[index].dueDate.toString()),
-                      subtitle:
-                          PlatformText(invoices[index].getTotal().toString()),
+                      title: PlatformText(invoices[index].dueDate.toString(),
+                          style: Theme.of(context).textTheme.headlineSmall),
+                      subtitle: PlatformText(
+                          invoices[index].getTotal().toString(),
+                          style: Theme.of(context).textTheme.bodyMedium),
                       onTap: () => {
                             Navigator.pushNamed(
                                 context, InvoiceDetailScreen.routeName,

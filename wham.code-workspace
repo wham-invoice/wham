@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "../../go/src/github.com/rstorr/wham-platform"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../svelte/wham-web"
+    }
+  ],
+  "settings": {}
+}

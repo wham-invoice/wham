@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 import 'package:wham/screens/contacts_screen.dart';
 import 'package:wham/screens/invoices_screen.dart';
-import 'package:wham/screens/new_contact_screen.dart';
-import 'package:wham/screens/new_invoice_screen.dart';
 import 'package:wham/screens/sign_in_screen.dart';
 import 'package:wham/screens/utils.dart';
-import 'package:wham/utils/authentication.dart';
+import 'package:wham/widgets/invoice_summary.dart';
+
+import '../network/auth/google_auth.dart';
 
 class HomeScreen extends StatelessWidget with UiLoggy {
   const HomeScreen({Key? key}) : super(key: key);
@@ -17,7 +17,6 @@ class HomeScreen extends StatelessWidget with UiLoggy {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
-    final welcomeBackMsg = "Welcome back " + args.signedInUser.displayName;
 
     const signOutSnackBar = SnackBar(
       content: Text('Signing out'),
@@ -33,7 +32,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: Text(welcomeBackMsg),
+                  child: InvoiceSummary(),
                 ),
                 Padding(
                   padding:
@@ -46,7 +45,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                         arguments: ScreenArguments(args.signedInUser),
                       );
                     },
-                    child: const Text('Invoices'),
+                    child: PlatformText('Invoices'),
                   ),
                 ),
                 Padding(
@@ -60,29 +59,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                         arguments: ScreenArguments(args.signedInUser),
                       );
                     },
-                    child: const Text('Contacts'),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, NewInvoiceScreen.routeName,
-                          arguments: ScreenArguments(args.signedInUser));
-                    },
-                    child: const Text('New Invoice'),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, NewContactScreen.routeName,
-                          arguments: ScreenArguments(args.signedInUser));
-                    },
-                    child: const Text('New Contact'),
+                    child: PlatformText('Contacts'),
                   ),
                 ),
                 Padding(
@@ -93,7 +70,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                       loggy.info("user pressed sign out");
                       ScaffoldMessenger.of(context)
                           .showSnackBar(signOutSnackBar);
-                      await Authentication.signOut(context: context);
+                      await GoogleAuth.signOut(context: context);
 
                       Navigator.of(context)
                           .pushReplacementNamed(SignInScreen.routeName);
