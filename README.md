@@ -17,3 +17,7 @@ All requests (except google auth) hit the Golang backend - github.com/wham-invoi
 
 Open banking integration via https://www.apicentre.paymentsnz.co.nz/
 Publish to Google Play Store & Apple App Store
+
+# How to run 
+
+`flutter run --debug`
