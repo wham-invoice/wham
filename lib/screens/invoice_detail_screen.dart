@@ -36,7 +36,7 @@ class InvoiceDetailScreen extends StatelessWidget {
                         return InvoiceDisplay(
                             invoice: args.invoice,
                             invoiceClient: snapshot.data! as Contact,
-                            user: args.user);
+                            user: args.signedInUser);
                       }
                       return const CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -121,12 +121,13 @@ class InvoiceDisplay extends StatelessWidget with UiLoggy {
                   onPressed: () async {
                     final response = await Requests.sendInvoiceEmail(
                         user.session, invoice.id!);
-                    if (response.statusCode == 200) {
+                    if (response.statusCode == 204) {
                       ScaffoldMessenger.of(context)
                           .showSnackBar(emailSuccessSB);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(emailFailSB);
-                      loggy.error("unable to send invoice", response.body);
+                      loggy.error(
+                          "unable to send invoice ${response.statusCode}");
                     }
                   },
                   child: const Text('Email Invoice'),

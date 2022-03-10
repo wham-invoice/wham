@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
+import 'package:wham/schema/contact.dart';
 import 'package:wham/schema/invoice.dart';
 import 'package:wham/screens/invoice_detail_screen.dart';
+import 'package:wham/screens/new_invoice_screen.dart';
 import 'package:wham/screens/utils.dart';
 
 class InvoicesScreen extends StatefulWidget {
@@ -29,38 +31,68 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
         appBar: PlatformAppBar(),
         iosContentPadding: false,
         iosContentBottomPadding: false,
-        body: StreamBuilder<QuerySnapshot>(
-            stream: _invoicesStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                loggy.error(snapshot.error);
-                return PlatformText('Something went wrong');
-              }
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                  stream: _invoicesStream,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      loggy.error(snapshot.error);
+                      return PlatformText('Something went wrong');
+                    }
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return PlatformText("Loading");
-              }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return PlatformText("Loading");
+                    }
 
-              List<Invoice> invoices = [];
-              for (final doc in snapshot.data!.docs) {
-                invoices.add(Invoice.fromSnapshot(doc));
-              }
+                    List<Invoice> invoices = [];
+                    for (final doc in snapshot.data!.docs) {
+                      invoices.add(Invoice.fromSnapshot(doc));
+                    }
 
-              return ListView.builder(
-                  itemCount: invoices.length,
-                  itemBuilder: (context, index) => PlatformListTile(
-                      title: PlatformText(invoices[index].dueDate.toString(),
-                          style: Theme.of(context).textTheme.headlineSmall),
-                      subtitle: PlatformText(
-                          invoices[index].getTotal().toString(),
-                          style: Theme.of(context).textTheme.bodyMedium),
-                      onTap: () => {
-                            Navigator.pushNamed(
-                                context, InvoiceDetailScreen.routeName,
-                                arguments: InvoiceDetailScreenArguments(
-                                    invoices[index], args.signedInUser))
-                          }));
-            }));
+                    return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: invoices.length,
+                        itemBuilder: (context, index) => PlatformListTile(
+                            title: PlatformText(
+                                invoices[index].dueDate.toString(),
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            subtitle: PlatformText(
+                                invoices[index].getTotal().toString(),
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            onTap: () => {
+                                  Navigator.pushNamed(
+                                      context, InvoiceDetailScreen.routeName,
+                                      arguments: InvoiceDetailScreenArguments(
+                                          invoices[index], args.signedInUser))
+                                }));
+                  }),
+            ),
+            FutureBuilder(
+                future: getContactsAll(args.signedInUser.id),
+                builder: ((context, snapshot) {
+                  if (snapshot.hasError) {
+                    print(snapshot.error);
+                    return PlatformText('Something went wrong');
+                  }
+
+                  if (snapshot.hasData) {
+                    return PlatformTextButtonIcon(
+                        onPressed: () => Navigator.pushNamed(
+                            context, NewInvoiceScreen.routeName,
+                            arguments: NewInvoiceScreenArguments(
+                                snapshot.data as List<Contact>,
+                                args.signedInUser)),
+                        icon: Icon(PlatformIcons(context).add),
+                        label: PlatformText("Create Invoice"));
+                  }
+
+                  return PlatformText("loading");
+                }))
+          ],
+        ));
   }
 }

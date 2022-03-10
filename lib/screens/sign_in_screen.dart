@@ -36,7 +36,7 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
         await GoogleAuth.signIn(
             context: context, logger: logger, gSignIn: gSignIn);
       } catch (e) {
-        logger.error('Error signing in silently', e);
+        logger.error('Error signing in silently ${e.toString()}', e);
         // should this be auth.signOut()?
         await gSignIn.signOut();
       }

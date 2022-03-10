@@ -1,14 +1,20 @@
 {
   "folders": [
     {
-      "path": "../../go/src/github.com/rstorr/wham-platform"
-    },
-    {
-      "path": "."
-    },
-    {
       "path": "../../svelte/wham-web"
     }
   ],
-  "settings": {}
+  "settings": {
+    "cSpell.words": [
+      "consts",
+      "gonic"
+    ],
+    "cSpell.ignoreWords": [
+      "PDFID",
+      "consts"
+    ],
+    "files.exclude": {
+      "node_modules": true
+    }
+  }
 }

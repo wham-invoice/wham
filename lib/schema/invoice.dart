@@ -43,7 +43,6 @@ class Invoice with UiLoggy {
   }
 
   Future<Contact> getContact() async {
-    loggy.info("invoice: $id - getting contact $contactID");
     developer.log("invoice: $id - getting contact $contactID",
         stackTrace: StackTrace.current);
     final Contact c = await getContactFromID(contactID);

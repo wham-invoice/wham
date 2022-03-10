@@ -22,6 +22,8 @@ class Contact {
         'last_name': lastName,
         'email': email
       };
+
+  get fullName => "$firstName $lastName";
 }
 
 Future<Contact> getContactFromID(String id) async {

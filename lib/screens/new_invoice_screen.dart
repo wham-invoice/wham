@@ -6,6 +6,8 @@ import 'package:wham/schema/contact.dart';
 import 'package:wham/schema/invoice.dart';
 import 'package:wham/screens/utils.dart';
 
+import '../network/requests.dart';
+
 class NewInvoiceScreen extends StatefulWidget {
   const NewInvoiceScreen({Key? key}) : super(key: key);
 
@@ -21,7 +23,8 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
   final descriptionTC = TextEditingController();
   final dueDateTC = TextEditingController();
   DateTime selectedDate = DateTime.now();
-  String clientDropdownValue = 'none';
+  String clientDropdownValue = "";
+
   final addSuccessSB =
       const SnackBar(content: Text('Invoice added successfully.'));
   final addFailSB = const SnackBar(content: Text('Failed to add invoice.'));
@@ -49,138 +52,143 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
-    Future<void> _addInvoice() {
-      final Invoice invoice = Invoice(
+    final args =
+        ModalRoute.of(context)!.settings.arguments as NewInvoiceScreenArguments;
+
+    _addInvoice() async {
+      final response = await Requests.createInvoice(
+        args.signedInUser.session,
         clientDropdownValue,
-        args.signedInUser.id,
-        double.parse(rateTC.text),
-        double.parse(hoursTC.text),
         descriptionTC.text,
-        selectedDate,
-        false,
+        double.parse(hoursTC.text),
+        double.parse(rateTC.text),
       );
 
-      return FirebaseFirestore.instance
-          .collection('invoices')
-          .add(invoice.toJson())
-          .then((value) {
+// TODO should be 200 as we're not returning anything
+      if (response.statusCode == 204) {
         ScaffoldMessenger.of(context).showSnackBar(addSuccessSB);
-        Navigator.pop(context);
-      }).catchError((error) {
-        loggy.error("Failed to add invoice: $error");
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(addFailSB);
-        Navigator.pop(context);
-      });
+        loggy.error("unable to create invoice ${response.body}");
+      }
+      Navigator.pop(context);
     }
 
     return PlatformScaffold(
-        appBar: PlatformAppBar(),
-        body: SingleChildScrollView(
+        iosContentPadding: true,
+        appBar: PlatformAppBar(
+          title: const Text('New Invoice'),
+        ),
+        body: LayoutBuilder(builder:
+            (BuildContext context, BoxConstraints viewportConstraints) {
+          return SingleChildScrollView(
             child: ConstrainedBox(
-          constraints: const BoxConstraints(),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformText("Customer"),
-                ),
-                Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    child: _clientListBuilder(args.signedInUser.id)),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformText("Total Hours"),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformTextField(
-                      controller: hoursTC,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          signed: true, decimal: true)),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformText("Hourly Rate"),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformTextField(
-                      controller: rateTC,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          signed: true, decimal: true)),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformText("Description"),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: PlatformTextField(
-                      controller: descriptionTC,
-                      keyboardType: TextInputType.text),
-                ),
-                Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    child: Column(
-                      children: [
-                        PlatformText(selectedDate.toString()),
-                        PlatformTextButton(
-                          onPressed: () => _selectDate(context),
-                          child: const Text('Due Date'),
-                        )
-                      ],
-                    )),
-                PlatformTextButton(
-                  onPressed: _addInvoice,
-                  child: const Text('Save'),
-                ),
-              ]),
-        )));
-  }
+              constraints: BoxConstraints(
+                minHeight: viewportConstraints.maxHeight,
+              ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 16),
+                      child: PlatformText("Customer"),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
+                        child: _clientList(args.contacts)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: PlatformText("Total Hours"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: PlatformTextField(
+                          controller: hoursTC,
+                          style: const TextStyle(color: Colors.white),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              signed: true, decimal: true)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: PlatformText("Hourly Rate"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: PlatformTextField(
+                          controller: rateTC,
+                          style: const TextStyle(color: Colors.white),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              signed: true, decimal: true)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: PlatformText("Description"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: PlatformTextField(
+                          controller: descriptionTC,
+                          hintText: "e.g 130 billable hours at \$80 per hour.",
+                          style: const TextStyle(color: Colors.white),
+                          keyboardType: TextInputType.text),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
+                        child: Column(
+                          children: [
+                            PlatformText(selectedDate.toString()),
+                            PlatformTextButton(
+                              onPressed: () => _selectDate(context),
+                              child: const Text('Due Date'),
+                            )
+                          ],
+                        )),
+                    PlatformTextButton(
+                      onPressed: _addInvoice,
+                      child: const Text('Save'),
+                    ),
+                  ]), // Column
+            ), // ConstrainedBox
+          );
+        }));
+  } // SingleChildScrollView
 
   // _clientListBuilder
-  Widget _clientListBuilder(String userID) {
-    return Center(
-        child: FutureBuilder<List<Contact>>(
-            future: getContactsAll(userID),
-            builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return PlatformText("Loading...");
-              }
-              List<DropdownMenuItem<String>> items =
-                  snapshot.data!.map((contact) {
-                return DropdownMenuItem<String>(
-                  value: contact.id,
-                  child: Text(contact.email),
-                );
-              }).toList();
+  Widget _clientList(List<Contact> contacts) {
+    List<DropdownMenuItem<String>> items = contacts.map((contact) {
+      return DropdownMenuItem<String>(
+        value: contact.id,
+        child: Text(contact.fullName),
+      );
+    }).toList();
 
-              return PlatformDropdownButton(
-                value: clientDropdownValue,
-                elevation: 16,
-                style: const TextStyle(color: Colors.deepPurple),
-                underline: Container(
-                  height: 2,
-                  color: Colors.deepPurpleAccent,
-                ),
-                onChanged: (String? newValue) {
-                  if (newValue == null) return;
-                  return setState(() => clientDropdownValue = newValue);
-                },
-                items: items,
-              );
-            }));
+    clientDropdownValue = items.first.value!;
+
+    return PlatformDropdownButton(
+      value: clientDropdownValue,
+      hint: PlatformText("Select a client"),
+      elevation: 16,
+      style: const TextStyle(color: Colors.deepPurple),
+      underline: Container(
+        height: 2,
+        color: Colors.deepPurpleAccent,
+      ),
+      onChanged: (String? newValue) {
+        loggy.info(newValue);
+        if (newValue == null) return;
+        return setState(() => clientDropdownValue = newValue);
+      },
+      items: items,
+    );
   }
 }

@@ -21,7 +21,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: _isSigningIn
           ? const Text(
-              "Loading... from button",
+              "Loading...",
             )
           : OutlinedButton(
               style: ButtonStyle(
@@ -60,8 +60,19 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
                     await widget.gSignIn.signIn();
 
                 if (googleSignInAccount != null) {
-                  await GoogleAuth.signIn(
-                      context: context, logger: loggy, gSignIn: widget.gSignIn);
+                  try {
+                    await GoogleAuth.signIn(
+                        context: context,
+                        logger: loggy,
+                        gSignIn: widget.gSignIn);
+                  } catch (e) {
+                    loggy.error(
+                        'Error signing in via button ${e.toString()}', e);
+                    await widget.gSignIn.signOut();
+                    setState(() {
+                      _isSigningIn = false;
+                    });
+                  }
                 } else {
                   loggy.error("Google sign in failed");
                   setState(() {

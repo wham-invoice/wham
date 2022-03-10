@@ -45,6 +45,7 @@ class GoogleAuth with UiLoggy {
         session, fireUser.uid, serverCode, auth.idToken!);
 
     inspect(platformUser);
+
     Navigator.pushReplacementNamed(context, HomeScreen.routeName,
         arguments: ScreenArguments(platformUser));
   }
