@@ -1,10 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:developer' as developer;
 import 'package:loggy/loggy.dart';
-import 'package:wham/schema/contact.dart';
 
 class Invoice with UiLoggy {
-  String? id;
+  final String id;
   final String contactID;
   final String userID;
   final double rate;
@@ -14,19 +11,26 @@ class Invoice with UiLoggy {
   final bool
       paid; //TODO: make this a enum/class with paid/open/overdue etc states.
 
-  Invoice(this.contactID, this.userID, this.rate, this.hours, this.description,
-      this.dueDate, this.paid,
-      [this.id]);
+  Invoice({
+    required this.id,
+    required this.userID,
+    required this.contactID,
+    required this.rate,
+    required this.hours,
+    required this.description,
+    required this.dueDate,
+    required this.paid,
+  });
 
-  Invoice.fromSnapshot(DocumentSnapshot snapshot)
-      : id = snapshot.id,
-        contactID = snapshot["contact_id"],
-        userID = snapshot["user_id"],
-        rate = snapshot["rate"],
-        hours = snapshot["hours"],
-        description = snapshot["description"],
-        dueDate = snapshot["due_date"].toDate(),
-        paid = snapshot["paid"];
+  Invoice.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        contactID = json["contact_id"],
+        userID = json["user_id"],
+        rate = json["rate"],
+        hours = json["hours"],
+        description = json["description"],
+        dueDate = json["due_date"].toDate(),
+        paid = json["paid"];
 
   Map<String, dynamic> toJson() => {
         'contact_id': contactID,
@@ -40,13 +44,5 @@ class Invoice with UiLoggy {
 
   double getTotal() {
     return rate * hours;
-  }
-
-  Future<Contact> getContact() async {
-    developer.log("invoice: $id - getting contact $contactID",
-        stackTrace: StackTrace.current);
-    final Contact c = await getContactFromID(contactID);
-
-    return c;
   }
 }

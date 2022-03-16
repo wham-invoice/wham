@@ -1,9 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:loggy/loggy.dart';
 import 'package:wham/schema/contact.dart';
-import 'package:wham/schema/invoice.dart';
 import 'package:wham/screens/utils.dart';
 
 import '../network/requests.dart';
@@ -184,7 +182,6 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
         color: Colors.deepPurpleAccent,
       ),
       onChanged: (String? newValue) {
-        loggy.info(newValue);
         if (newValue == null) return;
         return setState(() => clientDropdownValue = newValue);
       },

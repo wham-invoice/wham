@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
@@ -7,6 +6,8 @@ import 'package:wham/schema/invoice.dart';
 import 'package:wham/screens/invoice_detail_screen.dart';
 import 'package:wham/screens/new_invoice_screen.dart';
 import 'package:wham/screens/utils.dart';
+
+import '../network/requests.dart';
 
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({Key? key}) : super(key: key);
@@ -22,11 +23,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
 
-    final Stream<QuerySnapshot> _invoicesStream = FirebaseFirestore.instance
-        .collection('invoices')
-        .where("user_id", isEqualTo: args.signedInUser.id)
-        .snapshots();
-
     return PlatformScaffold(
         appBar: PlatformAppBar(),
         iosContentPadding: false,
@@ -34,12 +30,11 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
         body: Column(
           children: [
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: _invoicesStream,
+              child: FutureBuilder(
+                  future: Requests.getInvoices(args.signedInUser.session),
                   builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                      AsyncSnapshot<List<Invoice>> snapshot) {
                     if (snapshot.hasError) {
-                      loggy.error(snapshot.error);
                       return PlatformText('Something went wrong');
                     }
 
@@ -47,10 +42,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
                       return PlatformText("Loading");
                     }
 
-                    List<Invoice> invoices = [];
-                    for (final doc in snapshot.data!.docs) {
-                      invoices.add(Invoice.fromSnapshot(doc));
-                    }
+                    List<Invoice> invoices = snapshot.data!;
 
                     return ListView.builder(
                         shrinkWrap: true,
@@ -72,10 +64,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
                   }),
             ),
             FutureBuilder(
-                future: getContactsAll(args.signedInUser.id),
+                future: Requests.getContacts(args.signedInUser.session),
                 builder: ((context, snapshot) {
                   if (snapshot.hasError) {
-                    print(snapshot.error);
                     return PlatformText('Something went wrong');
                   }
 

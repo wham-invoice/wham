@@ -1,9 +1,9 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:loggy/loggy.dart';
-import 'package:wham/schema/contact.dart';
 import 'package:wham/screens/utils.dart';
+
+import '../network/requests.dart';
 
 class NewContactScreen extends StatefulWidget {
   const NewContactScreen({Key? key}) : super(key: key);
@@ -34,25 +34,22 @@ class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
-    Future<void> _addContact() {
-      final Contact contact = Contact(
-        args.signedInUser.id,
+
+    _addContact() async {
+      final response = await Requests.createContact(
+        args.signedInUser.session,
         firstNameTC.text,
         lastNameTC.text,
         emailTC.text,
       );
 
-      return FirebaseFirestore.instance
-          .collection('contacts')
-          .add(contact.toJson())
-          .then((value) {
+      if (response.statusCode == 204) {
         ScaffoldMessenger.of(context).showSnackBar(addSuccessSB);
-        Navigator.pop(context);
-      }).catchError((error) {
-        loggy.error("Failed to add contact: $error");
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(addFailSB);
-        Navigator.pop(context);
-      });
+        loggy.error("unable to create contact ${response.body}");
+      }
+      Navigator.pop(context);
     }
 
     return PlatformScaffold(

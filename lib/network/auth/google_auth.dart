@@ -21,7 +21,11 @@ class GoogleAuth with UiLoggy {
     required GoogleSignIn gSignIn,
   }) async {
     final Session session = Session();
-    final gUser = gSignIn.currentUser!;
+    final gUser = gSignIn.currentUser;
+
+    if (gUser == null) {
+      throw Exception("google sign in failed");
+    }
 
     String? serverCode = gUser.serverAuthCode;
     if (serverCode == null || serverCode == "") {
@@ -30,15 +34,15 @@ class GoogleAuth with UiLoggy {
 
     final GoogleSignInAuthentication? auth = await gUser.authentication;
     if (auth == null) {
-      throw Exception("expected google signin auth.");
+      throw Exception("expected google signin auth");
     }
     if (auth.idToken == null) {
-      throw Exception("expected google id_token.");
+      throw Exception("expected google id_token");
     }
 
     final fireUser = await _getFirebaseUser(context: context, gAuth: auth);
     if (fireUser == null) {
-      throw Exception("expected firebase user.");
+      throw Exception("expected firebase user");
     }
 
     final User platformUser = await Requests.platformLogin(
@@ -110,14 +114,17 @@ class GoogleAuth with UiLoggy {
   }
 
   //signOut signs us out of google and firebase accounts.
-  static Future<void> signOut({required BuildContext context}) async {
+  static Future<void> signOut({
+    required BuildContext context,
+    required Loggy<UiLoggy> logger,
+  }) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     try {
       await googleSignIn.signOut();
       await fire_auth.FirebaseAuth.instance.signOut();
     } catch (e) {
-      print(e);
+      logger.error(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         Snack.errorSnackBar(
           content: 'Error signing out. Try again.',

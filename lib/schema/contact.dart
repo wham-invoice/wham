@@ -1,20 +1,24 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Contact {
-  String? id;
-  String userID;
-  String firstName;
-  String lastName;
-  String email;
+  final String id;
+  final String userID;
+  final String firstName;
+  final String lastName;
+  final String email;
 
-  Contact(this.userID, this.firstName, this.lastName, this.email, [this.id]);
+  Contact({
+    required this.id,
+    required this.userID,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+  });
 
-  Contact.fromSnapshot(DocumentSnapshot snapshot)
-      : id = snapshot.id,
-        userID = snapshot["user_id"],
-        firstName = snapshot["first_name"],
-        lastName = snapshot["last_name"],
-        email = snapshot["email"];
+  Contact.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        userID = json['user_id'],
+        firstName = json['first_name'],
+        lastName = json['last_name'],
+        email = json['email'];
 
   Map<String, dynamic> toJson() => {
         'user_id': userID,
@@ -24,25 +28,4 @@ class Contact {
       };
 
   get fullName => "$firstName $lastName";
-}
-
-Future<Contact> getContactFromID(String id) async {
-  DocumentSnapshot doc =
-      await FirebaseFirestore.instance.collection('contacts').doc(id).get();
-
-  return Contact.fromSnapshot(doc);
-}
-
-Future<List<Contact>> getContactsAll(String userID) async {
-  List<Contact> contacts = [];
-  QuerySnapshot<Map<String, dynamic>> query = await FirebaseFirestore.instance
-      .collection('contacts')
-      .where("user_id", isEqualTo: userID)
-      .get();
-
-  for (DocumentSnapshot doc in query.docs) {
-    contacts.add(Contact.fromSnapshot(doc));
-  }
-
-  return contacts;
 }

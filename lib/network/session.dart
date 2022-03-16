@@ -3,16 +3,21 @@ import 'package:http/http.dart' as http;
 class Session {
   Map<String, String> headers = {};
 
-  Future<http.Response> get(String url) async {
-    http.Response response = await http.get(Uri.parse(url), headers: headers);
+  final platformAddress = 'http://localhost:8080';
+
+  Future<http.Response> get(String endpoint) async {
+    http.Response response =
+        await http.get(Uri.parse(platformAddress + endpoint), headers: headers);
     updateCookie(response);
 
     return response;
   }
 
-  Future<http.Response> post(String url, dynamic data) async {
-    http.Response response =
-        await http.post(Uri.parse(url), body: data, headers: headers);
+  Future<http.Response> post(String endpoint, dynamic data) async {
+    http.Response response = await http.post(
+        Uri.parse(platformAddress + endpoint),
+        body: data,
+        headers: headers);
     updateCookie(response);
 
     return response;

@@ -1,9 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 import 'package:wham/schema/contact.dart';
+import 'package:wham/screens/new_contact_screen.dart';
 import 'package:wham/screens/utils.dart';
+
+import '../network/requests.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({Key? key}) : super(key: key);
@@ -19,40 +21,41 @@ class _ContactsScreenState extends State<ContactsScreen> with UiLoggy {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
 
-    final Stream<QuerySnapshot> _contactsStream = FirebaseFirestore.instance
-        .collection('contacts')
-        .where("user_id", isEqualTo: args.signedInUser.id)
-        .snapshots();
-
     return PlatformScaffold(
         appBar: PlatformAppBar(),
         iosContentPadding: false,
         iosContentBottomPadding: false,
-        body: StreamBuilder<QuerySnapshot>(
-            stream: _contactsStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                loggy.error(snapshot.error);
-                return PlatformText('Something went wrong');
-              }
+        body: Column(
+          children: [
+            FutureBuilder(
+                future: Requests.getContacts(args.signedInUser.session),
+                builder: (context, AsyncSnapshot<List<Contact>> snapshot) {
+                  if (snapshot.hasError) {
+                    loggy.error(snapshot.error);
+                    return PlatformText('Something went wrong');
+                  }
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return PlatformText("Loading");
-              }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return PlatformText("Loading");
+                  }
 
-              List<Contact> contacts = [];
-              for (final doc in snapshot.data!.docs) {
-                contacts.add(Contact.fromSnapshot(doc));
-              }
+                  List<Contact> contacts = snapshot.data!;
 
-              return ListView.builder(
-                  itemCount: contacts.length,
-                  itemBuilder: (context, index) => PlatformListTile(
-                      title: PlatformText(
-                          "${contacts[index].firstName} ${contacts[index].lastName}"),
-                      subtitle: PlatformText(contacts[index].email),
-                      onTap: () => loggy.info("implement details screen")));
-            }));
+                  return ListView.builder(
+                      itemCount: contacts.length,
+                      itemBuilder: (context, index) => PlatformListTile(
+                          title: PlatformText(
+                              "${contacts[index].firstName} ${contacts[index].lastName}"),
+                          subtitle: PlatformText(contacts[index].email),
+                          onTap: () => loggy.info("implement details screen")));
+                }),
+            PlatformTextButtonIcon(
+                onPressed: () => Navigator.pushNamed(
+                    context, NewContactScreen.routeName,
+                    arguments: ScreenArguments(args.signedInUser)),
+                icon: Icon(PlatformIcons(context).add),
+                label: PlatformText("Create Contact"))
+          ],
+        ));
   }
 }

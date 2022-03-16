@@ -1,23 +1,21 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-
-// TODO this widget shows a summary of invoices.
-// 1. Total invoices
-// 2. Unpaid amount.
-//
-
 import 'package:flutter/material.dart';
+import 'package:wham/schema/user.dart';
 
 class InvoiceSummary extends StatelessWidget {
+  final UserSummary summary;
+  const InvoiceSummary(this.summary, {Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         PlatformText(
-          '\$100,234',
+          summary.invoiceTotal.toString() + " incl GST",
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         PlatformText(
-          'unpaid: \$10,234',
+          summary.unpaidTotal().toString() + " incl GST",
           style: Theme.of(context).textTheme.subtitle1,
         ),
       ],

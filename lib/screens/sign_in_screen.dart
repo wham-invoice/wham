@@ -37,8 +37,7 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
             context: context, logger: logger, gSignIn: gSignIn);
       } catch (e) {
         logger.error('Error signing in silently ${e.toString()}', e);
-        // should this be auth.signOut()?
-        await gSignIn.signOut();
+        await GoogleAuth.signOut(context: context, logger: logger);
       }
     }
   }
@@ -63,7 +62,7 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
                   Snack.errorSnackBar(
                       content:
                           "Error signing in ${snapshot.error}. signing out.");
-                  GoogleAuth.signOut(context: context);
+                  GoogleAuth.signOut(logger: loggy, context: context);
                 }
 
                 if (snapshot.connectionState == ConnectionState.done) {

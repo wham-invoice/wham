@@ -8,6 +8,8 @@ import 'package:wham/screens/utils.dart';
 import 'package:wham/widgets/invoice_summary.dart';
 
 import '../network/auth/google_auth.dart';
+import '../network/requests.dart';
+import '../schema/user.dart';
 
 class HomeScreen extends StatelessWidget with UiLoggy {
   const HomeScreen({Key? key}) : super(key: key);
@@ -32,7 +34,20 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: InvoiceSummary(),
+                  child: FutureBuilder(
+                      future: Requests.getSummary(args.signedInUser.session),
+                      builder: (context, AsyncSnapshot<UserSummary> snapshot) {
+                        if (snapshot.hasError) {
+                          return PlatformText('Something went wrong');
+                        }
+
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return PlatformText("Loading");
+                        }
+
+                        return InvoiceSummary(snapshot.data!);
+                      }),
                 ),
                 Padding(
                   padding:
@@ -70,7 +85,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                       loggy.info("user pressed sign out");
                       ScaffoldMessenger.of(context)
                           .showSnackBar(signOutSnackBar);
-                      await GoogleAuth.signOut(context: context);
+                      await GoogleAuth.signOut(logger: loggy, context: context);
 
                       Navigator.of(context)
                           .pushReplacementNamed(SignInScreen.routeName);

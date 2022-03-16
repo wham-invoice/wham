@@ -25,3 +25,21 @@ class User {
     );
   }
 }
+
+class UserSummary {
+  final double invoiceTotal;
+  final double invoicePaid;
+
+  UserSummary({
+    required this.invoiceTotal,
+    required this.invoicePaid,
+  });
+
+  UserSummary.fromJson(Map<String, dynamic> json)
+      : invoiceTotal = json['total'],
+        invoicePaid = json['paid'];
+
+  double unpaidTotal() {
+    return invoiceTotal - invoicePaid;
+  }
+}

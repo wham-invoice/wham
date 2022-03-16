@@ -43,7 +43,6 @@ dependencies:
     git:
       url: https://github.com/rstorr/enough_platform_widgets
   firebase_core: ^1.10.0
-  cloud_firestore: ^3.1.0
   logger: ^1.1.0
   google_sign_in: ^5.2.1
   http: ^0.13.4

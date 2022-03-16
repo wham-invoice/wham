@@ -18,14 +18,15 @@ class InvoiceDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments
         as InvoiceDetailScreenArguments;
-    final invoice = args.invoice;
 
     return PlatformScaffold(
         appBar: PlatformAppBar(),
         body: SingleChildScrollView(
             child: Center(
                 child: FutureBuilder(
-                    future: invoice.getContact(),
+                    // TODO we already get all the user contacts in invoice_screen. fix this flow.
+                    future: Requests.getContact(
+                        args.signedInUser.session, args.invoice.contactID),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         //TODO gracefully exit
@@ -64,6 +65,8 @@ class InvoiceDisplay extends StatelessWidget with UiLoggy {
 
   @override
   Widget build(BuildContext context) {
+    // TODO don't do the math here
+    // TODO invoice details don't need bucket info.
     final double total = invoice.hours * invoice.rate;
     final double gst = double.parse((total * 0.15).toStringAsFixed(2));
     final double acc = double.parse((total * 0.013).toStringAsFixed(2));
