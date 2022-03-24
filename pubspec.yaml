@@ -50,6 +50,7 @@ dependencies:
   loggy: ^2.0.1
   extension_google_sign_in_as_googleapis_auth: ^2.0.4
   googleapis: ^7.0.0
+  tuple: ^2.0.0
 
 dev_dependencies:
   flutter_test:

@@ -11,8 +11,9 @@ class ScreenArguments {
 class InvoiceDetailScreenArguments {
   final User signedInUser;
   final Invoice invoice;
+  final Contact contact;
 
-  InvoiceDetailScreenArguments(this.invoice, this.signedInUser);
+  InvoiceDetailScreenArguments(this.invoice, this.contact, this.signedInUser);
 }
 
 class NewInvoiceScreenArguments {
