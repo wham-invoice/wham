@@ -68,12 +68,17 @@ class _InvoicesScreenState extends State<InvoicesScreen> with UiLoggy {
                             subtitle: PlatformText(
                                 invoices[index].getTotal().toString(),
                                 style: Theme.of(context).textTheme.bodyMedium),
-                            onTap: () => {
-                                  Navigator.pushNamed(
+                            onTap: () async {
+                              var shouldRefresh =
+                                  await Navigator.pushNamed<bool>(
                                       context, InvoiceDetailScreen.routeName,
                                       arguments: InvoiceDetailScreenArguments(
-                                          invoices[index], args.signedInUser))
-                                }));
+                                          invoices[index], args.signedInUser));
+
+                              if (shouldRefresh!) {
+                                _refreshData();
+                              }
+                            }));
                   }),
             ),
             FutureBuilder(

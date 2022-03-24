@@ -66,8 +66,6 @@ class _WhamAppState extends State {
           routes: {
             HomeScreen.routeName: (context) => const HomeScreen(),
             InvoicesScreen.routeName: (context) => const InvoicesScreen(),
-            InvoiceDetailScreen.routeName: (context) =>
-                const InvoiceDetailScreen(),
             ContactsScreen.routeName: (context) => const ContactsScreen(),
             SignInScreen.routeName: (context) =>
                 Builder(builder: (context) => const SignInScreen()),
@@ -86,6 +84,13 @@ class _WhamAppState extends State {
                 return platformPageRoute<bool>(
                   context: context,
                   builder: (BuildContext context) => const NewInvoiceScreen(),
+                  settings: settings,
+                );
+              case InvoiceDetailScreen.routeName:
+                return platformPageRoute<bool>(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      const InvoiceDetailScreen(),
                   settings: settings,
                 );
             }

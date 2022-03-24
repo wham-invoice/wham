@@ -108,7 +108,7 @@ class GoogleAuth with UiLoggy {
 
   //signOut signs us out of google and firebase accounts.
   static Future<void> signOut({
-    required BuildContext context,
+    required BuildContext ctx,
     required Loggy<UiLoggy> logger,
   }) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -118,7 +118,7 @@ class GoogleAuth with UiLoggy {
       await fire_auth.FirebaseAuth.instance.signOut();
     } catch (e) {
       logger.error(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(ctx).showSnackBar(
         Snack.errorSnackBar(
           content: 'Error signing out. Try again.',
         ),

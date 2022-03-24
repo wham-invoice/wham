@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                       loggy.info("user pressed sign out");
                       ScaffoldMessenger.of(context)
                           .showSnackBar(signOutSnackBar);
-                      await GoogleAuth.signOut(logger: loggy, context: context);
+                      await GoogleAuth.signOut(logger: loggy, ctx: context);
 
                       Navigator.of(context)
                           .pushReplacementNamed(SignInScreen.routeName);
