@@ -1,10 +1,10 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:loggy/loggy.dart';
+import 'package:wham/network/invoices.dart';
 import 'package:wham/schema/contact.dart';
 import 'package:wham/screens/utils.dart';
-
-import '../network/requests.dart';
 
 class NewInvoiceScreen extends StatefulWidget {
   const NewInvoiceScreen({Key? key}) : super(key: key);
@@ -20,7 +20,17 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
   final rateTC = TextEditingController();
   final descriptionTC = TextEditingController();
   final dueDateTC = TextEditingController();
-  DateTime selectedDate = DateTime.now();
+  late DateTime dueDateSelect;
+  var formatter = DateFormat('dd-MM-yyyy');
+
+  @override
+  void initState() {
+    super.initState();
+
+    DateTime now = DateTime.now();
+    dueDateSelect = DateTime(now.year, now.month, now.day);
+  }
+
   String clientDropdownValue = "";
 
   final addSuccessSB =
@@ -39,12 +49,13 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
   _selectDate(BuildContext context) async {
     final DateTime? selected = await showPlatformDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: dueDateSelect,
       firstDate: DateTime(2010),
       lastDate: DateTime(2025),
     );
-    if (selected != null && selected != selectedDate) {
-      setState(() => selectedDate = selected);
+    if (selected != null && selected != dueDateSelect) {
+      setState(() => dueDateSelect =
+          DateTime(selected.year, selected.month, selected.day));
     }
   }
 
@@ -54,22 +65,20 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
         ModalRoute.of(context)!.settings.arguments as NewInvoiceScreenArguments;
 
     _addInvoice() async {
-      final response = await Requests.createInvoice(
-        args.signedInUser.session,
-        clientDropdownValue,
-        descriptionTC.text,
-        double.parse(hoursTC.text),
-        double.parse(rateTC.text),
-      );
-
-// TODO should be 200 as we're not returning anything
-      if (response.statusCode == 204) {
-        ScaffoldMessenger.of(context).showSnackBar(addSuccessSB);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(addFailSB);
-        loggy.error("unable to create invoice ${response.body}");
+      try {
+        await InvoiceRequests.create(
+          args.signedInUser.session,
+          clientDropdownValue,
+          descriptionTC.text,
+          double.parse(hoursTC.text),
+          double.parse(rateTC.text),
+          dueDateSelect,
+        );
+        Navigator.of(context).pop(true);
+      } catch (e) {
+        loggy.error("unable to create invoice: $e");
+        Navigator.of(context).pop(false);
       }
-      Navigator.pop(context);
     }
 
     return PlatformScaffold(
@@ -144,7 +153,7 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> with UiLoggy {
                             horizontal: 8, vertical: 10),
                         child: Column(
                           children: [
-                            PlatformText(selectedDate.toString()),
+                            PlatformText(formatter.format(dueDateSelect)),
                             PlatformTextButton(
                               onPressed: () => _selectDate(context),
                               child: const Text('Due Date'),

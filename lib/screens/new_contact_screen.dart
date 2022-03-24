@@ -1,9 +1,8 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
+import 'package:wham/network/contacts.dart';
 import 'package:wham/screens/utils.dart';
-
-import '../network/requests.dart';
 
 class NewContactScreen extends StatefulWidget {
   const NewContactScreen({Key? key}) : super(key: key);
@@ -17,6 +16,7 @@ class NewContactScreen extends StatefulWidget {
 class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
   final firstNameTC = TextEditingController();
   final lastNameTC = TextEditingController();
+  final phoneTC = TextEditingController();
   final emailTC = TextEditingController();
   final addSuccessSB =
       const SnackBar(content: Text('Contact added successfully.'));
@@ -36,20 +36,24 @@ class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
     final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
 
     _addContact() async {
-      final response = await Requests.createContact(
+      final response = await ContactRequests.create(
         args.signedInUser.session,
         firstNameTC.text,
         lastNameTC.text,
+        phoneTC.text,
         emailTC.text,
       );
 
-      if (response.statusCode == 204) {
+      bool success = response.statusCode == 200;
+
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(addSuccessSB);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(addFailSB);
         loggy.error("unable to create contact ${response.body}");
       }
-      Navigator.pop(context);
+
+      Navigator.of(context).pop(success);
     }
 
     return PlatformScaffold(
@@ -71,6 +75,7 @@ class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: PlatformTextField(
                       controller: firstNameTC,
+                      style: const TextStyle(color: Colors.white),
                       keyboardType: TextInputType.text),
                 ),
                 Padding(
@@ -82,7 +87,22 @@ class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: PlatformTextField(
-                      controller: lastNameTC, keyboardType: TextInputType.text),
+                      controller: lastNameTC,
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: PlatformText("Phone"),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: PlatformTextField(
+                      controller: phoneTC,
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text),
                 ),
                 Padding(
                   padding:
@@ -93,7 +113,9 @@ class _NewContactScreenState extends State<NewContactScreen> with UiLoggy {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: PlatformTextField(
-                      controller: emailTC, keyboardType: TextInputType.text),
+                      controller: emailTC,
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text),
                 ),
                 PlatformTextButton(
                   onPressed: _addContact,

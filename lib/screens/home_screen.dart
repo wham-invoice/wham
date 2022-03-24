@@ -1,6 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
+import 'package:wham/network/user.dart';
 import 'package:wham/screens/contacts_screen.dart';
 import 'package:wham/screens/invoices_screen.dart';
 import 'package:wham/screens/sign_in_screen.dart';
@@ -8,7 +9,6 @@ import 'package:wham/screens/utils.dart';
 import 'package:wham/widgets/invoice_summary.dart';
 
 import '../network/auth/google_auth.dart';
-import '../network/requests.dart';
 import '../schema/user.dart';
 
 class HomeScreen extends StatelessWidget with UiLoggy {
@@ -35,9 +35,11 @@ class HomeScreen extends StatelessWidget with UiLoggy {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: FutureBuilder(
-                      future: Requests.getSummary(args.signedInUser.session),
+                      future: UserRequests.summary(args.signedInUser.session),
                       builder: (context, AsyncSnapshot<UserSummary> snapshot) {
                         if (snapshot.hasError) {
+                          loggy.error(
+                              "unable to get summary + ${snapshot.error}");
                           return PlatformText('Something went wrong');
                         }
 

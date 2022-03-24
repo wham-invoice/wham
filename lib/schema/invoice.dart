@@ -1,12 +1,11 @@
-import 'package:loggy/loggy.dart';
-
-class Invoice with UiLoggy {
+class Invoice {
   final String id;
   final String contactID;
   final String userID;
-  final double rate;
-  final double hours;
+  final num rate;
+  final num hours;
   final String description;
+  final DateTime issueDate;
   final DateTime dueDate;
   final bool
       paid; //TODO: make this a enum/class with paid/open/overdue etc states.
@@ -18,6 +17,7 @@ class Invoice with UiLoggy {
     required this.rate,
     required this.hours,
     required this.description,
+    required this.issueDate,
     required this.dueDate,
     required this.paid,
   });
@@ -29,20 +29,11 @@ class Invoice with UiLoggy {
         rate = json["rate"],
         hours = json["hours"],
         description = json["description"],
-        dueDate = json["due_date"].toDate(),
+        issueDate = DateTime.parse(json["issue_date"]),
+        dueDate = DateTime.parse(json["due_date"]),
         paid = json["paid"];
 
-  Map<String, dynamic> toJson() => {
-        'contact_id': contactID,
-        'user_id': userID,
-        'rate': rate,
-        'hours': hours,
-        'description': description,
-        'due_date': dueDate,
-        'paid': paid
-      };
-
-  double getTotal() {
+  num getTotal() {
     return rate * hours;
   }
 }

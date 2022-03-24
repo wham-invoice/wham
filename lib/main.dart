@@ -68,11 +68,29 @@ class _WhamAppState extends State {
             InvoicesScreen.routeName: (context) => const InvoicesScreen(),
             InvoiceDetailScreen.routeName: (context) =>
                 const InvoiceDetailScreen(),
-            NewInvoiceScreen.routeName: (context) => const NewInvoiceScreen(),
             ContactsScreen.routeName: (context) => const ContactsScreen(),
-            NewContactScreen.routeName: (context) => const NewContactScreen(),
             SignInScreen.routeName: (context) =>
                 Builder(builder: (context) => const SignInScreen()),
+          },
+          onGenerateRoute: (RouteSettings settings) {
+            final String routeName = settings.name ?? '';
+
+            switch (routeName) {
+              case NewContactScreen.routeName:
+                return platformPageRoute<bool>(
+                  context: context,
+                  builder: (BuildContext context) => const NewContactScreen(),
+                  settings: settings,
+                );
+              case NewInvoiceScreen.routeName:
+                return platformPageRoute<bool>(
+                  context: context,
+                  builder: (BuildContext context) => const NewInvoiceScreen(),
+                  settings: settings,
+                );
+            }
+
+            throw Exception('Unknown route: $routeName');
           },
         ),
       ),

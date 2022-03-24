@@ -9,7 +9,7 @@ import '../network/auth/google_auth.dart';
 import '../widgets/snackbar.dart';
 
 class SignInScreen extends StatefulWidget {
-  static const routeName = '/sign-in';
+  static const routeName = '/';
 
   const SignInScreen({Key? key}) : super(key: key);
 
@@ -19,31 +19,26 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> with UiLoggy {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: <String>[GmailApi.gmailComposeScope],
+    scopes: <String>[GmailApi.gmailComposeScope, GmailApi.gmailSendScope],
   );
 
-  //Attempts to sign in a previously authenticated user without interaction.
-  //If the currently signed in user errors whilst authenticating w BE we sign out.
+  // _attemptSilentSignIn attempts to sign in a previously authenticated user without interaction.
   Future<void> _attemptSilentSignIn({
-    required BuildContext context,
+    required BuildContext ctx,
     required Loggy<UiLoggy> logger,
-    required GoogleSignIn gSignIn,
   }) async {
-    GoogleSignInAccount? account = await gSignIn.signInSilently();
+    GoogleSignInAccount? user = await _googleSignIn.signInSilently();
 
-    if (account != null) {
-      try {
-        await GoogleAuth.signIn(
-            context: context, logger: logger, gSignIn: gSignIn);
-      } catch (e) {
-        logger.error('Error signing in silently ${e.toString()}', e);
-        await GoogleAuth.signOut(context: context, logger: logger);
-      }
+    if (user == null) {
+      logger.info("silent sign in: no user signed in");
+      return;
     }
+
+    await GoogleAuth.onSignIn(ctx: ctx, logger: logger, user: user);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext ctx) {
     return PlatformScaffold(
       body: SafeArea(
         child: Padding(
@@ -55,21 +50,23 @@ class _SignInScreenState extends State<SignInScreen> with UiLoggy {
           child: Center(
             child: FutureBuilder(
               future: _attemptSilentSignIn(
-                  context: context, logger: loggy, gSignIn: _googleSignIn),
+                ctx: ctx,
+                logger: loggy,
+              ),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   loggy.error(snapshot.error);
-                  Snack.errorSnackBar(
-                      content:
-                          "Error signing in ${snapshot.error}. signing out.");
-                  GoogleAuth.signOut(logger: loggy, context: context);
+                  Snack.errorSnackBar(content: "error signing in ");
+                  GoogleAuth.signOut(logger: loggy, ctx: context);
                 }
 
+                // we attempted to sign in silently, but there was no user signed in.
+                // we need to show the sign in button.
                 if (snapshot.connectionState == ConnectionState.done) {
                   return GoogleSignInButton(_googleSignIn);
                 }
 
-                return const Text("Loading");
+                return PlatformText("loading");
               },
             ),
           ),

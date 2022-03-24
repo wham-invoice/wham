@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loggy/loggy.dart';
@@ -16,12 +17,12 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
   bool _isSigningIn = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext ctx) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: _isSigningIn
-          ? const Text(
-              "Loading...",
+          ? PlatformText(
+              "signing in to wham",
             )
           : OutlinedButton(
               style: ButtonStyle(
@@ -56,28 +57,20 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> with UiLoggy {
                 setState(() {
                   _isSigningIn = true;
                 });
-                GoogleSignInAccount? googleSignInAccount =
-                    await widget.gSignIn.signIn();
+                GoogleSignInAccount? user = await widget.gSignIn.signIn();
 
-                if (googleSignInAccount != null) {
-                  try {
-                    await GoogleAuth.signIn(
-                        context: context,
-                        logger: loggy,
-                        gSignIn: widget.gSignIn);
-                  } catch (e) {
-                    loggy.error(
-                        'Error signing in via button ${e.toString()}', e);
-                    await widget.gSignIn.signOut();
-                    setState(() {
-                      _isSigningIn = false;
-                    });
+                try {
+                  if (user == null) {
+                    throw Exception('no user signed in');
                   }
-                } else {
-                  loggy.error("Google sign in failed");
+                  await GoogleAuth.onSignIn(
+                      ctx: ctx, logger: loggy, user: user);
+                } catch (e) {
                   setState(() {
                     _isSigningIn = false;
                   });
+                  loggy.error('error signing into google ', e);
+                  await GoogleAuth.signOut(ctx: ctx, logger: loggy);
                 }
               },
             ),

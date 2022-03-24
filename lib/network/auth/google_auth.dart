@@ -1,38 +1,25 @@
-import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart' as fire_auth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loggy/loggy.dart';
 import 'package:wham/firebase_options.dart';
+import 'package:wham/network/user.dart';
 import 'package:wham/schema/user.dart';
 
 import '../../screens/home_screen.dart';
 import '../../screens/utils.dart';
 import '../../widgets/snackbar.dart';
-import '../requests.dart';
-import '../session.dart';
 
 class GoogleAuth with UiLoggy {
-  static Future<void> signIn({
-    required BuildContext context,
+  // onSignIn is called when the user is signed into google. We use this to sign
+  // in to firebase. Then
+  static Future<void> onSignIn({
+    required BuildContext ctx,
     required Loggy<UiLoggy> logger,
-    required GoogleSignIn gSignIn,
+    required GoogleSignInAccount user,
   }) async {
-    final Session session = Session();
-    final gUser = gSignIn.currentUser;
-
-    if (gUser == null) {
-      throw Exception("google sign in failed");
-    }
-
-    String? serverCode = gUser.serverAuthCode;
-    if (serverCode == null || serverCode == "") {
-      throw Exception("expected server code");
-    }
-
-    final GoogleSignInAuthentication? auth = await gUser.authentication;
+    final GoogleSignInAuthentication? auth = await user.authentication;
     if (auth == null) {
       throw Exception("expected google signin auth");
     }
@@ -40,17 +27,23 @@ class GoogleAuth with UiLoggy {
       throw Exception("expected google id_token");
     }
 
-    final fireUser = await _getFirebaseUser(context: context, gAuth: auth);
+    final fireUser = await _getFirebaseUser(context: ctx, gAuth: auth);
     if (fireUser == null) {
       throw Exception("expected firebase user");
     }
 
-    final User platformUser = await Requests.platformLogin(
-        session, fireUser.uid, serverCode, auth.idToken!);
+    String? serverCode = user.serverAuthCode;
+    if (serverCode == null || serverCode == "") {
+      throw Exception("expected server code");
+    }
 
-    inspect(platformUser);
+    final platformUser = await UserRequests.login(
+      fireUser.uid,
+      serverCode,
+      auth.idToken!,
+    );
 
-    Navigator.pushReplacementNamed(context, HomeScreen.routeName,
+    Navigator.pushReplacementNamed(ctx, HomeScreen.routeName,
         arguments: ScreenArguments(platformUser));
   }
 

@@ -27,8 +27,8 @@ class User {
 }
 
 class UserSummary {
-  final double invoiceTotal;
-  final double invoicePaid;
+  final num invoiceTotal;
+  final num invoicePaid;
 
   UserSummary({
     required this.invoiceTotal,
@@ -36,10 +36,10 @@ class UserSummary {
   });
 
   UserSummary.fromJson(Map<String, dynamic> json)
-      : invoiceTotal = json['total'],
-        invoicePaid = json['paid'];
+      : invoiceTotal = json['invoice_total'],
+        invoicePaid = json['invoice_paid'];
 
-  double unpaidTotal() {
+  num unpaidTotal() {
     return invoiceTotal - invoicePaid;
   }
 }
